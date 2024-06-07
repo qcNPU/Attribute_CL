@@ -306,6 +306,8 @@ class CoOp:
         if mean_per_class:
             return self._accuracy_mpc(loader, num_test, test_class)
         else:
+            #因为每个class的test数量是一样的，所以data-level的平均和task-level的结果一样
+            # print("taskMean acc",self._accuracy_mean_task(loader, num_test, test_class))
             return self._accuracy(loader, num_test, test_class)
 
     def _accuracy_mpc(self, loader, num_test, test_class):
@@ -322,17 +324,40 @@ class CoOp:
         acc = np.array(acc).mean()
         return acc
 
-    def _accuracy(self, loader, num_test, test_class):
+    def _accuracy(self, loader, ses, test_class):
         total_count=0
         acc_count =0
+
+        taskclassMap = {}
+        for t in range(ses):
+            taskclassMap[t]= list(range(t*self.args.class_per_task,(t+1)*self.args.class_per_task))
         for i,(x, y) in enumerate(loader):
-            pred_y = self.inference(x.cuda(), num_test, test_class)
+            pred_y = self.inference(x.cuda(), ses, test_class)
             _, top_labels = pred_y.topk(1, dim=-1)
             acc_count += (top_labels.view(-1)==y.cuda()).sum().cpu().numpy()
+
             total_count += y.shape[0]
         acc = acc_count*1.0/total_count
         acc = acc.item()
+        # print("data-level,match={},total={}".format(acc_count,total_count))
         return acc
+
+
+    def _accuracy_mean_task(self, loader, ses, test_class):
+        n_class = self.n_class
+        acc_per_task = [0 for _ in range(ses+1)]
+        count_per_task = [0 for _ in range(ses+1)]
+        for i, (x, y) in enumerate(loader):
+            pred_y = self.inference(x.cuda(),ses, test_class)
+            _, top_labels = pred_y.topk(1, dim=-1)
+            for t in range(ses+1):
+                acc_per_task[t] += ((top_labels.view(-1) == y.cuda()) * (y.cuda()// self.args.class_per_task== t)).sum().item()
+                count_per_task[t] += (y.cuda()// self.args.class_per_task == t).sum().item()
+        acc = [a*1.0/c for (a, c) in zip(acc_per_task, count_per_task)]
+        acc = np.array(acc).mean()
+        # print("task-level,match={},total={}".format(str(acc_per_task), str(count_per_task)))
+        return acc
+
 
     @torch.no_grad()
     def inference(self,image, num_test, test_class):

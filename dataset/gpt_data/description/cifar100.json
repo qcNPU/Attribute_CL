@@ -1,0 +1,702 @@
+{
+    "apple": [
+        "A small, round fruit with smooth skin, typically red or green in color, often featuring a stem and leaves.",
+        "The distinct features of an apple include its round shape, smooth skin, stem, leaf, and varying colors (red, green, yellow).",
+        "Look for round shape, smooth skin, stem, and variety of colors including red, green, or yellow to identify apples.",
+        "Apple is typically red or green, round, and has a stem and leaf, distinguishing it from other objects.",
+        "The distinct circular depression at the top of an apple where the stem is attached sets it apart visually."
+    ],
+    "aquarium_fish": [
+        "Aquarium fish are colorful, underwater creatures with fins and scales, often found swimming gracefully in tanks or ponds.",
+        "Aquarium fish can be recognized by their colorful scales, fins, and swimming motion in a water environment.",
+        "Identify aquarium fish by their streamlined bodies, fins, and vibrant colors, often seen in water tanks or aquariums.",
+        "Aquarium fish have fins, scales, and vibrant colors, while other objects lack these features and are inanimate.",
+        "The presence of gills and fins, distinct to aquatic environments, is a unique visual cue for aquarium_fish classification."
+    ],
+    "baby": [
+        "A small human infant with round features, soft skin, and often dressed in colorful clothing.",
+        "Distinct features of a baby for recognition are round face, large eyes, small nose, chubby cheeks, and soft skin.",
+        "Babies typically have a rounded face, large eyes, smooth skin, and small features compared to other objects.",
+        "Babies generally have round faces, soft skin, fine hair, small size, and specific body proportions compared to other objects.",
+        "Babies are typically characterized by their smaller size, rounder features, and dependency on adults for care and attention."
+    ],
+    "bear": [
+        "A bear is a large mammal with a stocky build, clawed paws, fur, and a distinctive snout and ears.",
+        "Bears have large bodies, thick fur, powerful limbs, and distinct snouts with rounded ears for recognition among all objects.",
+        "Bears are large mammals with a stocky build, long snout, rounded ears, sharp claws, and usually have fur.",
+        "Bears have furry bodies, sharp claws, and round ears, unlike other objects like cars or trees.",
+        "Bears are uniquely identified by their thick fur, large size, and distinctive snout, making them easily recognizable in images."
+    ],
+    "beaver": [
+        "A beaver is a large, brown rodent with webbed feet, a broad tail, and prominent incisors for chewing wood.",
+        "The distinct features of a beaver include webbed feet, large front teeth, flattened tail, waterproof fur, and sturdy build.",
+        "A beaver is a semi-aquatic rodent with a stocky body, webbed feet, large front teeth, and a flat tail.",
+        "Beavers have webbed hind feet, large incisors, brown fur, and a wide, flat tail, distinguishing them from other objects.",
+        "One unique visual cue of a beaver is its large, flat, scaly tail, which helps it maneuver in water."
+    ],
+    "bed": [
+        "A bed is a piece of furniture for sleeping or resting, typically with a mattress and a frame for support.",
+        "A bed's distinct features include a flat surface, raised edges, a headboard, a footboard, and typically four legs.",
+        "Identifying a bed in appearance involves recognizing a flat surface with a mattress for sleeping and resting comfortably.",
+        "Beds typically have a mattress and headboard, while other objects lack these features and come in various shapes and sizes.",
+        "A soft, cushioned surface for sleeping with a headboard, mattress, and bedding, typically found in a bedroom."
+    ],
+    "bee": [
+        "A bee is a small flying insect with black and yellow stripes, a distinct body, and transparent wings.",
+        "Bees have fuzzy bodies, yellow and black stripes, translucent wings, and elongated legs, leading to distinctive visual recognition.",
+        "Bees have a distinct appearance with a fuzzy body, yellow and black stripes, wings, and antennae, making them recognizable.",
+        "Bees have striped yellow and black bodies, fuzzy texture, and wings. They are smaller and more slender than other objects.",
+        "A bee is distinguished by its yellow and black striped body, hairy legs, and transparent wings for flying."
+    ],
+    "beetle": [
+        "A beetle is a small, insect-like creature with a hard exoskeleton and usually has six legs and antennae.",
+        "Beetle's distinct features include 6 legs, hard exoskeleton, and wing covers, aiding in its recognition among other objects.",
+        "Look for a small, hard-shelled insect with six legs, antennae, and often colorful patterns or markings on its body.",
+        "Beetles have hard, compact bodies, with distinctive wings and antennas, differing from other objects in shape and texture.",
+        "The unique visual cue of a beetle is its hard outer wing coverings, called elytra, which protect its delicate wings."
+    ],
+    "bicycle": [
+        "A bicycle is a two-wheeled vehicle with a frame, handlebars, pedals, and a saddle for human transportation and exercise.",
+        "Two wheels, handlebars, pedals, saddle, frame in a recognizable shape, distinguishable from other vehicles or sports equipment.",
+        "Look for two wheels, handlebars, and a frame. Identify the typical shape and size of a bicycle.",
+        "Bicycles typically have two wheels, a frame, handlebars, and pedals, distinguishing them from other objects like cars or motorcycles.",
+        "Spoked wheels with rubber tires, pedal-driven crankset, and handlebars are unique visual cues that distinguish bicycles from other objects."
+    ],
+    "bottle": [
+        "A bottle is a typically cylindrical container made of glass or plastic, often with a narrow neck and cap.",
+        "Bottles are typically cylindrical or narrow with a neck, often made of glass or plastic, and sealed with a cap.",
+        "Identify bottles by searching for elongated shapes with a narrow neck and a wider base in images.",
+        "Bottles typically have cylindrical bodies, narrow necks, and are designed for holding liquids, distinguishing them from other objects.",
+        "The distinct visual cue of a bottle is its elongated, cylindrical shape with a narrow neck and a rounded bottom."
+    ],
+    "bowl": [
+        "A bowl is a round, open container with a wide, flat bottom used for holding food, liquids, or other items.",
+        "A bowl is recognized by its round shape, concave interior, open top, smooth surface, and typically used for holding food.",
+        "A bowl has a concave shape, usually with a round or oval opening, and may have a smooth or textured surface.",
+        "A bowl typically has a rounded shape with a wide opening, compared to other objects that vary in size and shape.",
+        "A concave or curved shape with an open top and a narrow base, usually used for holding liquids or food."
+    ],
+    "boy": [
+        "A boy typically has a youthful appearance with short hair, wearing casual clothing and engaging in various activities.",
+        "Hair, facial features, clothing, and body structure including height and build are distinctive features for recognizing a boy.",
+        "I can identify a boy by looking for human features such as face, hair, body shape, and clothing characteristics.",
+        "A boy typically has a human form, recognizable facial features, hair, limbs, and is generally smaller in size.",
+        "The visual cue unique to a boy is the presence of short, cropped hair and typically more angular facial features."
+    ],
+    "bridge": [
+        "A bridge typically appears as a large, man-made structure spanning across water or land, facilitating transportation and connectivity.",
+        "Bridges can be recognized by their structure, spanning water or land, supporting traffic, and architectural designs.",
+        "Bridges can be identified by their structure, such as arches or suspension cables, spanning over a body of water.",
+        "A bridge typically has supports, spans over water or land, and facilitates the movement of vehicles and pedestrians.",
+        "The unique visual cue of a bridge is its elevated, linear structure connecting two points over a body of water."
+    ],
+    "bus": [
+        "A bus is a large, vehicle used for public transportation, typically with multiple rows of seats and large windows.",
+        "A bus can be recognized by its large size, boxy shape, wheels, windows, and distinctive elongated form with doors.",
+        "Buses can be identified by their elongated size, distinctive shape, multiple windows, and often have a front-mounted destination sign.",
+        "Buses are typically large, with a distinct boxy shape and a long body, often featuring large windows and wheels.",
+        "The unique visual cue of a bus is its elongated shape with a characteristic boxy and often double-decker structure."
+    ],
+    "butterfly": [
+        "A butterfly is a small, colorful insect with delicate wings, antennae, and a slender body, usually found near flowers.",
+        "Butterfly wings with colorful patterns and delicate structure, antennae, slender body, and six legs for accurate recognition.",
+        "Butterflies have delicate, colorful wings, distinct body shapes, and antennae, making them easily recognizable among other objects.",
+        "Butterflies have six legs, compound eyes, and wings with scales, while other objects lack these characteristics and body structure.",
+        "The unique visual cue of a butterfly is its intricate and colorful wing patterns, which are distinct and vibrant."
+    ],
+    "camel": [
+        "A camel is a large, humpbacked mammal with a long neck, sturdy legs, and a characteristic curved spine and tail.",
+        "Camel's distinctive features include long curved neck, humped back, broad hooves, and thick shaggy coat for recognition.",
+        "Camels have long curved necks, humped backs, long legs, and distinct hoof shape, making them recognizable among other animals.",
+        "Camels have long legs, humped backs, and distinctive necks, distinguishing them from other objects with their unique physical features.",
+        "The unique visual cue of a camel is its humped back, distinguishing it from other objects in a desert landscape."
+    ],
+    "can": [
+        "A cylindrical metal container with a pull-tab opening, typically used for storing and preserving food or beverages.",
+        "Cylindrical shape, metal material, pull-tab lid, and printed label are distinct features for can recognition.",
+        "Identify a can by its cylindrical shape, metal or plastic material, and often with a pull-tab or pop-top lid.",
+        "A can is typically cylindrical, made of metal or plastic, with a pull-tab or pop-top lid for sealing.",
+        "The unique visual cue of a can is its cylindrical shape with a flat top and bottom, often metallic."
+    ],
+    "castle": [
+        "A castle is a large, grand, and imposing structure with turrets, towers, and often surrounded by a protective moat.",
+        "Castles often have tall towers, fortified walls, battlements, and a moat, making them easily recognizable in images.",
+        "Identify castles by their large, grand, fortified structures with towers, walls, and often located on elevated terrain.",
+        "A castle typically has turrets, a moat, and a grand facade, distinguishing it from other structures with plain architecture.",
+        "Castles often have large, imposing stone walls with battlements, turrets, and arrow slits, giving them a distinctive and defensive appearance."
+    ],
+    "caterpillar": [
+        "A caterpillar is a small, elongated creature with a soft, segmented body and multiple legs, typically found on plants.",
+        "Caterpillars are characterized by their long, soft bodies with distinct segments and numerous prolegs for gripping.",
+        "Caterpillars have a long, segmented body with a distinct head, six true legs, and usually several pairs of fleshy prolegs.",
+        "Caterpillars have long bodies with multiple segments, distinct legs, and often colorful patterns, distinguishing them from other objects.",
+        "The unique visual cue of a caterpillar is its segmented body with distinct patterns and often vibrant colors."
+    ],
+    "cattle": [
+        "Cattle are large domesticated mammals with cloven hooves, typically having a short-haired coat and horns.",
+        "Cattle can be recognized by their large size, distinctive horns, hooves, and characteristic fur or hide markings.",
+        "Cattle can be identified by their large size, four legs, hooves, horns, and distinct body shape with a tail.",
+        "Cattle have a distinct body shape, hooves, horns, and fur, distinguishing them from other objects with their unique features.",
+        "The presence of distinctive horns or humps on the head and body distinguishes cattle from other objects."
+    ],
+    "chair": [
+        "A chair is a piece of furniture with a seat, back, and often four legs for sitting and resting.",
+        "Chairs can be recognized by their seat, backrest, and typically four legs, with various shapes, materials, and designs.",
+        "Chairs typically have a seat, backrest, and four legs, distinguishing them from other objects through their specific structural features.",
+        "Chairs typically have a seat, backrest, and four legs, distinguishing them from other objects such as tables and sofas.",
+        "Chairs typically have a seat surface and a backrest, distinguishing them from other objects in a room."
+    ],
+    "chimpanzee": [
+        "A chimpanzee is a mammal with fur, a human-like face, and long arms, known for its intelligence and social behavior.",
+        "Chimpanzees have dark fur, expressive faces with prominent ears and lips, and long arms compared to their body size.",
+        "Chimpanzees have black fur, apelike facial features, long arms, and a hunched posture, distinguishing them from other objects.",
+        "Chimpanzees have fur, resemble humans, have long limbs, and are primates; different from plants, cars, buildings, and electronics.",
+        "Chimpanzees have a protruding snout, a hairless face, and elongated arms, which are unique features distinguishing them from other primates."
+    ],
+    "clock": [
+        "A clock is a circular or rectangular device with numbers and hands used to measure and display time.",
+        "Circular shape, clock hands, numbers or dials, time indicators, often mounted on a wall or displayed on a stand.",
+        "Identify clock by detecting circular shape, numbers or clock hands, discerning from background, and recognizing time-telling features accurately.",
+        "Clocks typically have circular faces, numbers, and hands for time-telling, distinguishing them from other objects.",
+        "The circular shape of a clock face with numbers and hands indicating time, distinctive to clock among objects."
+    ],
+    "cloud": [
+        "A cloud appears as a fluffy, white mass of condensed water vapor floating in the sky among various objects.",
+        "Clouds are characterized by their varying shapes, sizes, textures, and colors, making them distinct for recognition in images.",
+        "Identify clouds by their soft, billowy appearance, often white or gray, and typically found in the sky.",
+        "Clouds are large, fluffy, and often white, while other objects are solid, varied in color, and stationary or mobile.",
+        "The unique visual cue of a cloud is its soft, billowy, and ever-changing shape that floats in the sky."
+    ],
+    "cockroach": [
+        "A cockroach is a small, brown insect with a flat, oval body and long antennae, often found in dark areas.",
+        "Cockroaches have six legs, antennae, flat bodies, and a pair of wings, making them distinguishable from other objects.",
+        "Cockroaches have flat bodies, long antennae, six legs, and are typically dark brown in color with a shiny appearance.",
+        "Cockroach: six legs, two long antennae, flat body, brown color. Other objects: diverse shapes, colors, and structures.",
+        "A unique visual cue of a cockroach is its long, slender antennae and flattened body, distinguishing it from other objects."
+    ],
+    "couch": [
+        "A couch is a comfortable, upholstered piece of furniture with a back and arms for sitting or lying down.",
+        "Couch features include soft, upholstered surface, backrest, armrests, and a typically long and rectangular shape for recognition.",
+        "Identify objects with cushioned seats, a backrest, and armrests, typically found in living rooms, as a couch.",
+        "A couch typically has a cushioned seat, a backrest, and armrests, distinguishing it from chairs, tables, and beds.",
+        "The visual cue unique to a couch is its long, cushioned seat for sitting or reclining comfortably."
+    ],
+    "crab": [
+        "A crab is a small crustacean with a hard exoskeleton, ten legs, claws, and a sideways walking motion.",
+        "Crabs have ten legs, a broad, flat body, a pair of claws, a hard exoskeleton, and two stalked eyes.",
+        "Crabs have a broad body, a pair of claws, and ten legs, with a distinct sideways scuttling movement on beaches.",
+        "Crabs have a distinct shape with 10 legs, two pincers, a hard outer shell, and typically move sideways.",
+        "The unique visual cue of a crab is its distinct ten-legged body with a hard exoskeleton and pincers."
+    ],
+    "crocodile": [
+        "A crocodile is a large, reptilian animal with a long snout, scaly skin, powerful jaws, and a streamlined, aquatic body.",
+        "Distinct features of a crocodile include long jaws with sharp teeth, armored scales, powerful tail, webbed feet, and stealthy demeanor.",
+        "Crocodiles have a long, pointed snout, armored skin, powerful tail, webbed feet, and prominent eyes located at the top.",
+        "Crocodiles have long snouts, thick scales, and powerful jaws compared to other objects, with distinctive eyes and mobility.",
+        "The unique visual cue of a crocodile is its long, narrow snout with sharp, pointed teeth and armored scales."
+    ],
+    "cup": [
+        "A cup is a small, handle-less container often made of ceramic or glass, designed for holding and drinking liquids.",
+        "Cups are recognized by their cylindrical shape, handle, and open top for holding and serving beverages.",
+        "Look for a handle, a cylindrical shape, and a concave top. It may be made of ceramic, glass, or plastic.",
+        "Cups typically have a cylindrical shape with a handle, while other objects can vary widely in size, shape, and material.",
+        "The concave shape with a distinct handle on one side is a unique visual cue that defines a cup."
+    ],
+    "dinosaur": [
+        "A dinosaur is a large, extinct reptile with a long tail, powerful legs, sharp teeth, and often distinctive body armor.",
+        "Dinosaurs have large, scaly bodies, long tails, powerful jaws, sharp teeth, and distinct clawed feet for recognition.",
+        "Look for large body, long tail, sharp teeth, reptilian features, and distinctive scales or feathers. Compare with known dinosaur images.",
+        "Dinosaurs have distinct features such as scales, sharp claws, and large teeth while other objects lack these characteristics.",
+        "Dinosaurs have a unique visual cue of large, bony protrusions on their skeletons, called osteoderms, which are not present in other objects."
+    ],
+    "dolphin": [
+        "A sleek marine mammal with a curved dorsal fin, streamlined body, and distinctive beak, known for intelligence and playfulness.",
+        "Dolphins have a streamlined body, curved dorsal fin, beak-like rostrum, and prominent flippers and tail for recognition.",
+        "Dolphins have a streamlined body, a dorsal fin, a prominent beak, and unique coloration, often with a distinct \"smiling\" expression.",
+        "Dolphins have streamlined bodies, dorsal fins, flippers, and a beak, distinguishing them from other objects in appearance.",
+        "The unique visual cue of a dolphin is its streamlined body and dorsal fin, distinctively shaped and positioned for swimming efficiently."
+    ],
+    "elephant": [
+        "An elephant is a large mammal with a long trunk, tusks, floppy ears, and thick legs, typically found in Africa and Asia.",
+        "Large body, long trunk, floppy ears, tusks, thick legs, distinct silhouette, grey wrinkled skin, and unique majestic presence.",
+        "An elephant can be identified by its large size, long trunk, tusks, big ears, and gray wrinkled skin.",
+        "Elephants are large, gray mammals with long trunks, tusks, and big ears, distinct from other objects in size and features.",
+        "Elephants have long, curved tusks that protrude from their upper jaw, serving as unique and distinct visual cues."
+    ],
+    "flatfish": [
+        "Flatfish have a distinctive, flattened body with both eyes on one side, allowing them to blend seamlessly into the seabed.",
+        "Asymmetric body, both eyes on one side, and distinct coloration make flatfish identifiable among other objects.",
+        "A flatfish typically has a compressed body, both eyes on one side, and a camouflage coloration to blend with sand.",
+        "Flatfish have a distinct asymmetrical body, both eyes on one side, and a flat shape, unlike other objects.",
+        "Flatfish have unique asymmetrical eyes on one side of their body, allowing them to lie flat on the seafloor."
+    ],
+    "forest": [
+        "A dense, green expanse of tall trees, shrubs, and undergrowth, often accompanied by wildlife and natural beauty.",
+        "Forests have dense vegetation, diverse tree species, canopy cover, and wildlife, making them distinguishable in image classification tasks.",
+        "I can identify a forest by recognizing dense trees, green foliage, and a natural landscape with diverse vegetation.",
+        "Forests have dense clusters of trees and vegetation, while other objects have varying structures, shapes, and colors.",
+        "The dense cluster of trees with a varied height and foliage creates a distinct visual cue for a forest."
+    ],
+    "fox": [
+        "A fox is a small-to-medium-sized carnivorous mammal with a bushy tail, pointed ears, and a distinctive red fur coat.",
+        "Red fur, pointed ears, long bushy tail, slender body, and black legs distinguish a fox for recognition from other objects.",
+        "Foxes typically have a slender body, pointed snout, bushy tail, and reddish-brown fur with white markings on the face.",
+        "Foxes have pointed snouts, bushy tails, and reddish fur, distinguishing them from other objects like rocks, trees, and cars.",
+        "The pointed snout, triangular ears, and bushy tail are unique visual cues that distinguish a fox from other animals."
+    ],
+    "girl": [
+        "A girl typically has long hair, wears a dress or pants, and may carry a purse or backpack.",
+        "Distinct features of a girl include long hair, feminine facial features, and typically wearing dresses and skirts.",
+        "Identify gender based on facial features, body shape, hairstyle, and clothing, while considering diversity and individuality with respect and sensitivity.",
+        "Girls are typically human, with distinctive facial features, hair, and clothing, whereas other objects vary in shape and structure.",
+        "A unique visual cue for a girl could be wearing a dress, characterized by feminine and flowing fabric and design."
+    ],
+    "hamster": [
+        "A small, furry rodent with round ears, a short snout, and a stout body, often kept as a pet.",
+        "Distinct features of hamsters include small size, round bodies, furry texture, cheek pouches, short legs, and whiskers for recognition.",
+        "Identify hamsters by their small size, round bodies, furry coats, short legs, and distinctive cheek pouches when pondering.",
+        "Hamsters have a round body, short legs, furry coat, and small ears, distinguishing them from other objects in appearance.",
+        "A distinct visual cue of a hamster is its small size, chubby cheek pouches, short legs, and tiny rounded ears."
+    ],
+    "house": [
+        "A house is a permanent structure for living, typically with walls, a roof, windows, and a door for entry.",
+        "Distinct features of houses for recognition include shapes, windows, doors, roofs, chimneys, and architectural styles.",
+        "Identify houses based on features like rectangular shape, windows, doors, and a roof, distinguishing them from other structures.",
+        "A house typically has a distinct structure, multiple rooms, windows, and a roof, unlike other objects such as furniture or appliances.",
+        "A distinct visual cue of a house is its sloping roof, which distinguishes it from other objects."
+    ],
+    "kangaroo": [
+        "A kangaroo is a marsupial with a powerful build, large hind legs, long tail, and distinctive pouch for carrying young.",
+        "Kangaroo's distinct features include large hind legs, powerful tail, and pouch for joey, enabling recognition in image classification.",
+        "Kangaroos are marsupials with large hind legs, strong tails, long pointed ears, and distinctive hopping locomotion.",
+        "Kangaroos have large hind legs, strong tails, and a distinctive pouch, distinguishing them from other animals in appearance.",
+        "Kangaroos have a distinctive pouch on their abdomen, used to carry and protect their young joeys."
+    ],
+    "keyboard": [
+        "A keyboard is a rectangular input device with keys for typing, commonly connected to a computer or other electronic device.",
+        "The distinct features of a keyboard for recognition include keys, size, layout, letters, symbols, and functional keys.",
+        "A keyboard can be identified by its rectangular shape, keys arranged in rows, and USB or wireless connectivity.",
+        "Keyboards typically have rows of keys with letters, symbols, and numbers, contrasting with other objects in shape and function.",
+        "The presence of keys arranged in a specific pattern, often with letters, numbers, and symbols, is unique to keyboards."
+    ],
+    "lamp": [
+        "A lamp is an electrical device with a stand and shade that emits light to illuminate its surroundings.",
+        "Lamps are often characterized by their bulb, lamp shade, base, and electrical cord for easy recognition in images.",
+        "Lamps typically have a stand, a lampshade, and a bulb, with a distinct shape and generally emit light.",
+        "Lamp has a stand, shade, and emits light, distinguishing it from other objects such as tables, chairs, and sofas.",
+        "The visual cue unique to a lamp is its bulb or light source, emitting illumination and casting a glow."
+    ],
+    "lawn_mower": [
+        "A lawn mower is a machine with a handle, wheels, and a cutting blade used for trimming grass.",
+        "Key features of a lawn mower include a rotating blade, wheels, handle for pushing, grass collector, and motor for cutting grass.",
+        "A lawn mower appears as a wheeled machine with blades, commonly used for cutting grass in outdoor spaces.",
+        "A lawn mower typically has a large cutting blade, wheels, and a handle, distinguishing it from other household and garden tools.",
+        "The spinning metal blade underneath the lawn mower is a unique visual cue that sets it apart from other objects."
+    ],
+    "leopard": [
+        "A leopard is a large, carnivorous feline with a sleek, spotted coat, powerful build, and distinctive rosette markings.",
+        "The distinct features of a leopard for recognition are its spotted coat, muscular build, and distinctive facial markings.",
+        "Leopards have golden-yellow coats with black spots, rosettes, and a distinctive pattern, making them easily recognizable among objects.",
+        "Leopards have distinctive spots, a powerful build, and a sleek coat, setting them apart from other objects in appearance.",
+        "Leopard's distinctive rosette spots, with solid spots inside, provide a unique visual cue for identification among other objects."
+    ],
+    "lion": [
+        "A lion is a large, powerful carnivorous mammal with a distinctive mane, strong body, sharp claws, and intimidating roar.",
+        "Lion: golden fur, mane, muscular build, prominent whiskers, powerful jaws, and fierce expression for easy 20-word recognition.",
+        "Lions have a distinctive appearance with a golden coat, mane (on males), strong build, and characteristic facial features.",
+        "Lions have a distinctive mane, powerful build, and fierce expression, differentiating them from other objects in appearance.",
+        "The unique visual cue of a lion is its distinctive mane, which is a thick growth of hair around its neck."
+    ],
+    "lizard": [
+        "A lizard is a small reptile with scaly skin, a long tail, and the ability to camouflage in its environment.",
+        "Lizard features include scaly skin, long tail, four legs, and unique body shape, aiding in identification within image classification.",
+        "Lizards typically have scaly skin, long tails, and four legs with clawed toes, and they often have a streamlined body shape.",
+        "Lizards have elongated bodies, scaly skin, clawed feet, and long tails, distinguishing them from other objects in appearance.",
+        "Scales covering the body, long tail, and four legs distinguish lizards with their reptilian appearance."
+    ],
+    "lobster": [
+        "A lobster is a crustacean with a hard exoskeleton, long antennae, and clawed legs, typically found in marine environments.",
+        "Lobster's distinct features include a hard exoskeleton, claws, antennae, segmented body, and distinct coloration for recognition.",
+        "Lobsters have a distinct appearance with a spiny exoskeleton, large claws, segmented body, and long antennae.",
+        "Lobsters have a distinct spiny exoskeleton, long antennae, and clawed legs, which distinguish them from other objects.",
+        "The segmented, jointed exoskeleton and a pair of large claws are unique visual cues of lobsters among objects."
+    ],
+    "man": [
+        "A man typically has two arms, two legs, a torso, and a head with facial features, resembling other human figures.",
+        "The distinct features of man for recognition are face, body shape, posture, hair, facial hair, and clothing style.",
+        "Look for features such as facial hair, prominent jawline, and broader shoulders to identify a man in appearance.",
+        "Men typically have a symmetrical face, two eyes, a nose, and a mouth, unlike other objects like animals or plants.",
+        "The unique visual cue to humans among all objects is the presence of facial features, particularly eyes, nose, and mouth."
+    ],
+    "maple_tree": [
+        "The maple tree is a tall, deciduous tree with green leaves that turn vibrant red, orange, or yellow in autumn.",
+        "Maple_tree has distinct lobed leaves, characteristic bark, and produces \"helicopter\" seeds, aiding in its visual recognition.",
+        "Maple trees have distinct palmate leaves, grayish-brown bark, and a spreading crown, typically found in temperate regions.",
+        "Maple trees have distinct lobed leaves, a sturdy trunk, and a dense canopy, distinguishing them from other objects.",
+        "The unique visual cue of a maple tree is its distinct, hand-shaped leaves with prominent, symmetrical, and serrated edges."
+    ],
+    "motorcycle": [
+        "A motorcycle is a two-wheeled motor vehicle with a seat, handlebars, and engine, typically used for transportation or recreation.",
+        "Motorcycle: two wheels, handlebars, engine, seat, exhaust, headlights, and distinctive frame shape for recognition among all objects.",
+        "Identify motorcycles by their two wheels, handlebars, and streamlined frame, often with riders wearing helmets and protective gear.",
+        "Motorcycles have two wheels, handlebars, and a seat, while other objects have different shapes and functions.",
+        "Motorcycles typically have two wheels and a frame in between, distinguishing them from other modes of transportation."
+    ],
+    "mountain": [
+        "A mountain is a large, natural landform, typically with steep sides and a peak that rises above its surroundings.",
+        "Prominent peak, rugged terrain, often snow-capped, and surrounded by valleys, forests, and steep slopes, typically large in size.",
+        "Mountains typically have rugged, rocky terrain, towering peaks, and are often surrounded by clouds or snow-covered slopes.",
+        "Mountains are large, natural landforms with rugged peaks, whereas other objects vary in size, shape, and structure.",
+        "The unique visual cue of a mountain is its towering peak reaching into the sky, dominating the landscape majestically."
+    ],
+    "mouse": [
+        "A small, furry rodent with a long tail, round ears, and whiskers, typically found in various environments worldwide.",
+        "Small, pointed snout, round ears, long tail, four legs, fur-covered body, and characteristic scurrying movement for mouse recognition.",
+        "I can identify a mouse by recognizing its small size, furry coat, long tail, and distinct features like whiskers.",
+        "A mouse typically has a small, hand-held size compared to other objects, with distinct buttons and a scrolling wheel.",
+        "A mouse typically has a small, rounded body with large ears and a long, thin tail."
+    ],
+    "mushroom": [
+        "Mushrooms are fleshy, spore-bearing fungi with umbrella-shaped caps and varying colors, often found in wooded areas or on logs.",
+        "Distinct features of mushrooms include cap shape, gill type, spore color, stem structure, and overall coloration for recognition.",
+        "Identify mushroom by its cap, gills, stem, and overall appearance, comparing it to known mushroom characteristics and features.",
+        "Mushrooms have various shapes, sizes, and colors, such as caps, gills, and stems, distinct from non-fungal objects.",
+        "Mushrooms have unique gills on the underside of their cap, which are thin, papery structures that release spores when mature."
+    ],
+    "oak_tree": [
+        "An oak tree is a tall, sturdy tree with broad leaves and a thick trunk, commonly found in woodlands.",
+        "The distinct features of an oak tree include its rough, furrowed bark, lobed leaves, and acorns.",
+        "Look for a tall, robust tree with lobed leaves and acorns, often growing in a symmetrical, upright manner.",
+        "Oak_tree has a thick, rugged trunk, with dense, lobed leaves, and acorns, distinct from other objects in appearance.",
+        "The unique visual cue of an oak tree is its lobed and toothed leaves with distinctive acorns."
+    ],
+    "orange": [
+        "Orange is a vibrant color commonly found in fruits, sunsets, and construction gear, standing out with its bold warmth.",
+        "Orange: round shape, bright orange color, citrus texture, small stem, may have leaves, distinctive fragrance, nutritious and juicy.",
+        "An orange can be identified by its round shape, bright orange color, slightly dimpled skin, and citrusy aroma.",
+        "Oranges are round, orange in color, with a pebbled texture, while other objects may have different shapes, colors, and textures.",
+        "The unique visual cue of an orange is its vibrant, distinctively bright orange color, often seen in spherical fruit shapes."
+    ],
+    "orchid": [
+        "An orchid is a delicate, colorful flower with intricate petals and a slender stem, often found in vibrant environments.",
+        "Distinctive features of orchids include bilaterally symmetrical petals, column structure, colorful patterns, and diverse shapes and sizes.",
+        "Look for unique, intricate, and colorful blooms, with distinctive petal and sepal arrangements, often found in tropical climates.",
+        "Orchids generally have distinct, symmetrically shaped petals and a column of reproductive structures, unlike most other objects.",
+        "Orchids have distinctive bilaterally symmetric petals and a column, typically with pollen sacs, unlike any other flowering plant."
+    ],
+    "otter": [
+        "An otter is a small, furry, aquatic mammal with a sleek body, webbed feet, and a playful, inquisitive demeanor.",
+        "Otters are recognized by their sleek, elongated bodies, webbed feet, sharp claws, and dense, water-repellent fur.",
+        "Otters are semi-aquatic mammals with streamlined bodies, webbed feet, dense fur, and long tails for swimming gracefully.",
+        "Otters have streamlined bodies, webbed feet, thick fur, and whiskered faces, distinguishing them from other objects like rocks or plants.",
+        "The webbed feet of an otter are unique, designed for efficient swimming and diving, making them excellent aquatic hunters."
+    ],
+    "palm_tree": [
+        "A palm tree is a tall, slender tree with a crown of long, feathery fronds and a straight trunk.",
+        "Distinctive features of palm trees include tall thin trunks, large compound leaves, and a unique crown of fronds.",
+        "Identify palm_tree by its tall, slender trunk, large fan-shaped leaves, and distinctive crown of fronds.",
+        "Palm trees have tall, slender trunks, large, fan-shaped leaves, and a distinct, tropical appearance compared to other objects.",
+        "The unique visual cue for a palm tree is its tall, slender trunk topped with a cluster of distinct fronds."
+    ],
+    "pear": [
+        "A pear is a green or yellow fruit with a distinctive curvy shape and a small brown stem on top.",
+        "The distinct features of a pear for recognition are its narrow top, wide bottom, curved body, and small stem.",
+        "Pears are typically green or yellow, with a bulbous bottom and a narrower top, often with a distinctive stem.",
+        "Pears are typically green or yellow, have a characteristic shape, and a textured skin, distinct from other fruits or vegetables.",
+        "The unique visual cue of a pear is its distinct bell-shaped, narrow top with a round base and speckled skin."
+    ],
+    "pickup_truck": [
+        "A pickup truck is a large vehicle with an open cargo area and a roofed passenger cabin for transporting goods.",
+        "Pickup trucks typically have a flatbed, large tires, a cab for passengers, and a boxy overall shape for recognition.",
+        "A pickup truck typically has a flatbed or open cargo area behind the cab with a distinct truck-like appearance.",
+        "Pickup trucks have a flatbed, larger size, and a distinct cab shape compared to other vehicles and objects.",
+        "The unique visual cue for a pickup truck is the open truck bed designed to carry and transport large items."
+    ],
+    "pine_tree": [
+        "A pine tree typically has long green needles and a conical shape, standing tall with a woody trunk.",
+        "Pine trees are characterized by their needle-like leaves, tall and straight trunks, distinctive cones, and evergreen foliage.",
+        "Look for a tall, conical shape with needle-like leaves clustered in bundles, typically found in forests or parks.",
+        "Pine_tree has needle-like leaves, a conical shape, and rough bark, distinguishing it from other objects in appearance.",
+        "The unique visual cue of a pine tree is the presence of needle-like leaves arranged in clusters on branches."
+    ],
+    "plain": [
+        "Plainness suggests simplicity and lack of adornment. It may be exemplified by a single, unadorned surface devoid of embellishments.",
+        "Plain recognition features include vast, open space, minimal features, relatively flat terrain, and unobstructed views with sparse vegetation.",
+        "A plain object typically lacks prominent features, has a uniform texture, and exhibits minimal visual complexity or variation.",
+        "Planes have smooth, streamlined shapes, wings, and a tail, while other objects vary in size, shape, and functionality.",
+        "The plain is typically characterized by a vast, flat and open landscape with minimal natural features or structures present."
+    ],
+    "plate": [
+        "A plate is a flat, circular object typically made of ceramic or glass used for serving food or meals.",
+        "Rectangular shape, raised characters, reflective surface, standardized size, and vehicle location, often with regional identifiers for recognition.",
+        "Identify plates by their circular shape, flat surface, and raised edges, typically made of ceramic, porcelain, or glass.",
+        "Plates are typically round, flat, and smooth with raised edges, while other objects vary in shape, texture, and purpose.",
+        "The flat, circular shape with a raised edge and smooth surface is unique to plates and distinguishes them from other objects."
+    ],
+    "poppy": [
+        "The poppy is a bright red flower with delicate petals and a dark center among green leaves and stems.",
+        "Poppy can be recognized by its bright, colorful petals, unique pod shape, and distinctive, feathery foliage.",
+        "Poppy has distinctive large, colorful, cup-shaped flowers with four petals and a dark center. Foliage is deeply lobed.",
+        "Poppy has delicate, papery petals and a distinct center, contrasting with non-floral objects by its natural, intricate structure.",
+        "The distinct visual cue of a poppy is its delicate, papery petals in vibrant shades of red, orange, or pink."
+    ],
+    "porcupine": [
+        "Porcupine is a small mammal covered in sharp spines, with a round body and a distinctive quill-covered appearance.",
+        "Porcupine features sharp quills, stout body, and distinctive white-striped face, enabling recognition among other objects.",
+        "Porcupines are small, spiny mammals with sharp quills, a stocky body, and a distinctive rounded shape when viewed from above.",
+        "Porcupines have spiky quills, while other objects lack quills. Porcupines have brown fur and a stocky body.",
+        "Porcupines have sharp quills on their bodies, a unique visual cue that distinguishes them from other animals."
+    ],
+    "possum": [
+        "A possum is a small-to-medium-sized marsupial with a furry body, long tail, pointed snout, and sharp claws.",
+        "Possums have a pointy snout, long prehensile tail, large rounded ears, and gray fur with a distinctive white face.",
+        "A possum can be identified by its small to medium size, with a pointed nose, sharp teeth, and bushy tail.",
+        "Possums have a pointed snout, long tail, fur, and grayish color, distinguishing them from non-living objects like rocks or trees.",
+        "The prehensile tail of a possum, used for grasping and climbing, is unique to possum among all objects."
+    ],
+    "rabbit": [
+        "A rabbit is a small mammal with long ears, a fluffy tail, and a distinctive hopping gait.",
+        "Rabbits are recognized by their long ears, fluffy fur, twitching nose, and short tails, distinctive for image classification.",
+        "Rabbits have long ears, fluffy tails, and a small, compact body with a distinctive hopping gait and soft fur.",
+        "Rabbits have long ears, fluffy tails, and compact bodies, unlike other objects, and they often have distinctive fur patterns.",
+        "Rabbits have long ears that are uniquely upright and mobile, which help in sensing danger and regulating body temperature."
+    ],
+    "raccoon": [
+        "A raccoon is a medium-sized mammal with gray fur, a distinctive black mask, and ringed tail, known for its cunning demeanor.",
+        "Raccoon features: distinctive facial mask, ringed tail, gray fur, and agile paws for recognition in image classification.",
+        "Raccoons are small, grayish animals with distinctive black \"mask\" patterns around their eyes and ringed bushy tails.",
+        "Raccoons have distinctive masked faces, ringed tails, and a mix of grey, black, and white fur, unlike other objects.",
+        "Raccoon's distinct black mask around its eyes and alternating light and dark bands on its tail set it apart."
+    ],
+    "ray": [
+        "A slender, elongated structure with a pointed tip, often appearing translucent and gracefully gliding through water with ease.",
+        "Ray has a flat body, elongated snout, and large pectoral fins for recognition among all objects.",
+        "Rays are typically identified by their flattened body, wing-like pectoral fins, and long, whip-like tail.",
+        "Rays are elongated, cartilaginous fish with flat bodies and distinctive wing-like pectoral fins, distinct from other fish species.",
+        "The pointed, wing-like extensions known as \"wings\" on the body of a ray are unique visual cues."
+    ],
+    "road": [
+        "A road is a flat, paved or gravel surface for vehicles, often lined with markings and bordered by curbs.",
+        "Roads are characterized by their linear shape, gray color, texture, and presence of lane markings and signages.",
+        "Roads can be identified by their long and straight shape, smooth surface, and often accompanied by traffic signs or vehicles.",
+        "Roads are typically long, straight, and gray, while other objects vary in color, shape, and texture.",
+        "The straight, white lines typically found on roads are a unique visual cue that distinguishes them from other objects."
+    ],
+    "rocket": [
+        "A sleek, cylindrical structure with a pointed nose cone and fins, typically standing upright and emitting billowing clouds of exhaust.",
+        "Rockets are typically cylindrical with a pointed nose cone and fins, often emitting fire and smoke during propulsion.",
+        "Identify a rocket by its cylindrical body, streamlined shape, fins, and exhaust plume during takeoff or flight.",
+        "Rockets are typically long with a pointed end, cylindrical body, and fins, making them distinguishable from other objects.",
+        "The conical shape of the rocket's nose cone distinguishes it from other objects, serving an aerodynamic purpose during flight."
+    ],
+    "rose": [
+        "A rose typically has a delicate and vibrant appearance, with layers of soft, colorful petals and a distinctive floral fragrance.",
+        "Distinct features of a rose include its petal arrangement, shape, color, fragrance, thorns, and overall floral structure for recognition.",
+        "\"Identifying a rose involves recognizing its distinct petal arrangement, thorns, and characteristic fragrance using visual cues.\"",
+        "Roses have delicate, layered petals, thorny stems, and a distinct sweet scent that sets them apart from other objects.",
+        "The distinct visual cue of a rose is its petal arrangement, with overlapping and serrated edges, and vibrant color."
+    ],
+    "sea": [
+        "The sea is a vast expanse of shimmering blue water, with waves gently crashing and seagulls soaring above.",
+        "Distinct features of sea: shades of blue and green, waves, aquatic life, reflections, and horizon line separating water and sky.",
+        "I can identify the sea by looking for large bodies of blue water, waves, and surrounding coastlines or landmasses.",
+        "Sea: blue, wavy, reflective, marine life. Other objects: varied colors, solid shapes, non-reflective, man-made or natural, stationary.",
+        "The unique visual cue of the sea is its characteristic blue color, reflecting the sky and the depth of water."
+    ],
+    "seal": [
+        "A seal is a marine mammal with a streamlined body, flippers, and whiskers, usually found near coastal areas.",
+        "Seal recognition features include a streamlined body, flippers for swimming, whiskers, and a round, expressive face with dark eyes.",
+        "I can identify a seal by its round body, flippers, whiskers, and varying shades of gray fur or skin.",
+        "Seals have flippers, whiskers, streamlined bodies; distinguishable from other objects by their cute, aquatic features and marine habitat.",
+        "The unique visual cue of a seal is its streamlined body, flipper-like limbs, and blubber layer for swimming ability."
+    ],
+    "shark": [
+        "A shark is a large fish with a sleek, torpedo-shaped body, sharp teeth, and powerful jaws for hunting and feeding.",
+        "Sharks have a streamlined body, sharp teeth, gill slits, dorsal fin, and a distinct tail, aiding in their recognition.",
+        "Sharks typically have a streamlined body, cartilaginous skeleton, a large dorsal fin, sharp teeth, and gills for breathing underwater.",
+        "Sharks have streamlined bodies, sharp teeth, and gill slits, distinguishing them from other objects in the ocean environment.",
+        "Sharks have unique gill slits on the sides of their bodies that provide oxygenated water flow for breathing."
+    ],
+    "shrew": [
+        "A shrew is a small, mouse-like mammal with a pointed snout, tiny eyes, short legs, and dense fur coat.",
+        "Shrews are small mammals with pointed snouts, small eyes, and a slender body covered in dense fur.",
+        "Shrews are small, mouse-like mammals with a pointed snout, small eyes, and dense fur, typically brown or gray.",
+        "Shrews are small, mouse-like mammals with pointed snouts, whereas other objects vary significantly in size, shape, and color.",
+        "The long, pointed snout and small size are unique visual cues that distinguish shrews from other objects."
+    ],
+    "skunk": [
+        "A skunk is a small mammal with black fur, a white stripe, and a distinctive odor-producing ability.",
+        "Skunks have distinctive black and white fur patterns, bushy tails, and a strong, pungent odor for recognition.",
+        "Skunks can be identified by their distinct appearance: black fur with a white stripe, pointed snout, and bushy tail.",
+        "Skunks have distinctive black and white fur, bushy tail, and a small head, unlike most animals or objects.",
+        "Black and white stripe pattern on the fur of a skunk, which is unique and easily recognizable in nature."
+    ],
+    "skyscraper": [
+        "A skyscraper is a tall, towering structure made of steel and glass, reaching high into the urban skyline.",
+        "Skyscrapers are tall, slender structures with multiple levels, glass facades, and prominent presence in urban skylines worldwide.",
+        "Skyscrapers are tall, have multiple stories, sleek and modern designs, and are typically found in urban cityscapes.",
+        "Skyscrapers are tall, high-rise buildings with many floors and large windows, distinct from shorter, smaller structures.",
+        "Skyscrapers are tall structures with multiple stories, standing out due to their towering height and vertical architectural design."
+    ],
+    "snail": [
+        "A small, spiral-shelled gastropod with a slimy body, retractable antennae, and a strong muscular foot for locomotion.",
+        "Snail's distinct features include spiral shell, muscular foot, and tentacles with eyes, making it recognizable among other objects.",
+        "Look for a small, cone-shaped shell with ridges, slimy body, and tentacles. Often found in moist environments.",
+        "Snails have spiral shells, slimy bodies, and antennae, unlike other objects, which lack these physical features.",
+        "The spiral shell structure, often with visible ridges, is unique to snails, providing protection and support for their bodies."
+    ],
+    "snake": [
+        "A snake is a long, legless reptile with scales, a forked tongue, and a distinctive slithering movement.",
+        "Long, slender body, scaly skin, no legs, forked tongue, unblinking eyes, and ability to slither create recognizable snake features.",
+        "Look for long, slender body; scale pattern; forked tongue; and possibly distinctive colors or markings for snake identification.",
+        "Snakes have long, slender bodies, scaly skin, and no legs, while other objects have various shapes, textures, and structures.",
+        "The unique visual cue for snakes is their long, slender body with distinctive scales and lack of limbs."
+    ],
+    "spider": [
+        "A spider has eight legs and a segmented body with silk-producing organs, typically varying in size and coloration.",
+        "Spiders have eight legs, two body segments, multiple eyes, and often spin webs, distinguishing them from other objects.",
+        "A spider can be identified by its eight legs, segmented body, and usually having multiple eyes and producing silk.",
+        "Spiders have eight legs, two body segments, and spin silk webs, distinguishing them from other objects like bugs or insects.",
+        "Spider has eight legs, distinct from most objects, which helps in identifying its unique visual cue."
+    ],
+    "squirrel": [
+        "A squirrel is a small, bushy-tailed rodent with a furry coat, sharp claws, and a nimble, agile demeanor.",
+        "Squirrel features: bushy tail, furry coat, small size, pointed ears, and nimble movements for accurate recognition in images.",
+        "Squirrels are small, bushy-tailed rodents with sharp claws, pointed ears, and a distinctive upright posture when moving or sitting.",
+        "Squirrels have bushy tails, pointed ears, and fuzzy fur, distinguishing them from other objects like rocks, trees, and birds.",
+        "Squirrels are uniquely identified by their bushy tail, which is long and fluffy with a distinctive curved shape."
+    ],
+    "streetcar": [
+        "A streetcar is a type of public transportation vehicle with a long, rectangular body and wheels on tracks.",
+        "Streetcars can be recognized by their long, narrow bodies, overhead power lines, rails, and large windows for passenger visibility.",
+        "Identify streetcars by their long, narrow shape, tracks beneath, overhead wires, and typically colorful exteriors in urban settings.",
+        "Streetcars have tracks, overhead wires, and a streamlined shape, while other objects lack these features and have different shapes.",
+        "Streetcars have overhead electrical wires which are a unique visual cue distinguishing them from other objects on the road."
+    ],
+    "sunflower": [
+        "A sunflower is a tall, yellow-flowered plant with a large, vibrant center that faces the sun in well-lit areas.",
+        "Large, bright yellow petals, dark center, tall stem, and prominent green leaves distinguish sunflowers from other objects.",
+        "Sunflowers have vibrant yellow petals arranged in a spiral pattern around a dark center with a wide, sturdy stem.",
+        "Sunflowers have bright yellow petals centered around a dark disc while other objects vary in shape, color, and texture.",
+        "The unique visual cue of a sunflower is its large, bright yellow flower head with radiating petals and dark center."
+    ],
+    "sweet_pepper": [
+        "Sweet peppers are smooth-skinned vegetables with a bell-like shape, available in various colors like red, green, and yellow.",
+        "Sweet pepper has a bell-shaped body, smooth skin, and a vibrant red, yellow, or green color with a distinct texture.",
+        "Sweet pepper is identifiable by its bell shape, smooth outer skin, and vibrant colors such as red, yellow, or green.",
+        "Sweet peppers have a smooth, shiny surface, a distinctive bell shape, and a vibrant green, red, or yellow color.",
+        "Sweet peppers have a distinctive bell shape with a thick, crunchy flesh and a glossy outer skin in various colors."
+    ],
+    "table": [
+        "A table is a flat, rectangular surface supported by legs, often used for dining, working, or holding objects.",
+        "Flat surface, legs or support structure, rectangular or round shape, often used for dining or work.",
+        "Look for a flat horizontal surface with legs or a support structure, often used for dining or working.",
+        "Tables are flat surfaces with legs and are distinguishable from other objects by their rectangular shape and functional design.",
+        "A flat surface supported by legs or a pedestal; usually for holding objects, eating, or working."
+    ],
+    "tank": [
+        "A tank is a large armored military vehicle with tracks, a rotating turret, and powerful weaponry for combat operations.",
+        "Distinct features of a tank for recognition include a large armored body, turret, tracks, cannon, and military camouflage.",
+        "Identifying a tank can be achieved by analyzing its distinct shape, size, tracks, and turret on a military vehicle.",
+        "Tanks are armored, mobile military vehicles with tracks, turrets, and cannons, distinguished from other objects by their design and purpose.",
+        "The unique visual cue of a tank is its large, heavily-armored, caterpillar-style tracks that enable it to move over rough terrain."
+    ],
+    "telephone": [
+        "A telephone is a handheld communication device, typically with a keypad and receiver, often made of plastic and metal.",
+        "Telephone: rectangular body, handset with microphone and earpiece, keypad or touchscreen, cord or wireless, receiver, speaker.",
+        "Identify a telephone by its handset, receiver, keypad, and display screen, typically connected to a base with buttons.",
+        "A telephone typically has buttons, a receiver, and a cord, distinguishing it from objects like pens, books, and glasses.",
+        "Telephone has a distinct handset with a receiver and dial pad, typically connected to a base unit via wire."
+    ],
+    "television": [
+        "Television is a rectangular electronic device with a screen for displaying images and audio for entertainment and information.",
+        "Television is characterized by its rectangular shape, screen, control buttons, ports, stand, and logo for recognition in images.",
+        "Identify a television by its rectangular shape, screen, buttons or remote, antenna/cable connection, and brand logo.",
+        "Television has a flat screen, speakers, input/output ports, and a remote, distinguishing it from most other household objects.",
+        "The presence of a screen displaying moving images and sound, uniquely identifying television from other objects."
+    ],
+    "tiger": [
+        "A tiger is a large, powerful carnivorous mammal with orange fur, black stripes, sharp teeth, and fierce, predatory eyes.",
+        "Tiger has distinct orange fur with black stripes, a muscular build, and sharp claws, making it easily recognizable.",
+        "Tigers have distinctive orange fur with black stripes, white facial markings, and a muscular, predatory build, standing out visually.",
+        "Tigers have distinct orange fur with black stripes, sharp claws, and a large head compared to other objects.",
+        "The unique visual cue of a tiger is its distinctive orange fur with black stripes and piercing eyes."
+    ],
+    "tractor": [
+        "A tractor typically has a large body, wheels, a cabin for the driver, and may have farming equipment attached.",
+        "Large wheels, plow, towing hitch, and industrial design are distinctive features for recognising a tractor among other objects.",
+        "Identify tractors by recognizing their large wheels, open cabs, and machinery attachments on agricultural or construction sites.",
+        "A tractor typically has large, rugged tires, a prominent exhaust stack, a towing hitch, and a distinct boxy chassis.",
+        "The unique visual cue of a tractor is its large, rugged tires and its distinctive front grille and headlights."
+    ],
+    "train": [
+        "A train is a long vehicle on tracks, often with multiple cars, used for transporting passengers or cargo efficiently.",
+        "Trains typically have a long, cylindrical body, a set of wheels on tracks, and a front-facing locomotive engine.",
+        "Trains typically appear as long, rectangular vehicles with multiple cars, wheels, and often a distinct front locomotive section.",
+        "Trains are elongated, have wheels on tracks, and often have a locomotive, while other objects vary in size and shape.",
+        "The unique visual cue for a train is its elongated, cylindrical body with attached cars on a set of tracks."
+    ],
+    "trout": [
+        "A trout is a freshwater fish with a streamlined body, colorful scales, and a distinctive pattern on its sides.",
+        "Trout are recognized by their streamlined body, spotted pattern, adipose fin, and forked tail, distinguishing them from other objects.",
+        "Trout are typically identified by their streamlined body, adipose fin, forked tail, and distinctive spotted pattern.",
+        "Trout have streamlined bodies, adipose fins, and spotted patterns, distinguishing them from other objects like rocks or plants.",
+        "Trout have distinct spots along their sides, which are unique among objects and help with camouflage in their environment."
+    ],
+    "tulip": [
+        "A tulip is a vibrant, delicate flower with slender green stems and colorful petals in various shades and patterns.",
+        "Tulip's distinct features for recognition include its six-petal, bright-colored, cup-shaped flower with long, slender stem and leaves.",
+        "Tulips typically have six petals and are known for their bell-shaped flowers in various colors, especially bright pink.",
+        "Tulips have six-petaled, cup-shaped flowers in various colors, distinct from other objects with their floral structure and color.",
+        "The unique visual cue of a tulip is its distinct cup-shaped flower with symmetrical petals in various colors."
+    ],
+    "turtle": [
+        "A turtle is a shelled reptile with a distinctive, dome-shaped shell and webbed feet, typically found in aquatic habitats.",
+        "Turtle features include a streamlined shell, four legs with webbed feet, a beak, and a distinct head and tail.",
+        "Turtles have a distinct shell, webbed feet, and a beak-like mouth, commonly found near water or on land.",
+        "Turtles have a distinct shell, long neck, and webbed feet, distinguishing them from other objects in appearance.",
+        "The unique visual cue for a turtle is its distinctive hard shell and scaly skin, which distinguishes it from other objects."
+    ],
+    "wardrobe": [
+        "A large piece of furniture with doors and drawers for storing clothes, shoes, and accessories in an organized manner.",
+        "A wardrobe can be identified by its rectangular shape, doors, shelves, hanging rods, and its function for storing clothes.",
+        "Identify wardrobe by its rectangular shape, hanging clothes, shelves, and drawers for storing clothing and accessories.",
+        "A wardrobe typically has doors, shelves, and a hanging rod, while other objects vary in shape, size, and function.",
+        "The unique visual cue for a wardrobe is its distinct structure with doors, shelves, and hanging space for clothing."
+    ],
+    "whale": [
+        "A large marine mammal with a streamlined body, flippers, a powerful tail, and a distinctive blowhole for breathing at the surface.",
+        "Whale's distinct features include streamlined body, flippers, dorsal fin, blowhole, and tail flukes, enabling accurate recognition in images.",
+        "Whales are large, aquatic mammals with streamlined bodies, flippers, and a horizontal tail fluke for swimming efficiently in water.",
+        "Whales have streamlined bodies, flippers, and horizontal tail fins, while other objects lack these distinctive features.",
+        "Whales have a unique visual cue of a large, streamlined body, flippers, and a distinct tail fluke for swimming."
+    ],
+    "willow_tree": [
+        "A willow tree is a tall, slender tree with drooping branches and narrow leaves, often found near water bodies.",
+        "Narrow leaves, slender branches, drooping growth form, furrowed bark, and distinct catkins make willow trees recognizable.",
+        "The willow tree has long, narrow leaves, drooping branches, and a slender trunk with a rough, furrowed bark.",
+        "A willow tree has long, slender leaves and drooping branches, distinguishing it from objects with different shapes and sizes.",
+        "The long, slender, drooping branches with narrow, pointed leaves define the distinctive appearance of a willow tree."
+    ],
+    "wolf": [
+        "A wolf is a large canid with a thick fur coat, pointy ears, a long snout, and keen eyes.",
+        "The distinct features of a wolf for recognition are its pointed ears, bushy tail, sharp eyes, and strong build.",
+        "Wolves have a distinctive appearance with pointed ears, a long snout, a thick coat, and a bushy tail.",
+        "Wolves have pointed ears, a long snout, a thick fur coat, and a bushy tail, distinguishing them from other objects.",
+        "Wolf's unique visual cue is their distinct yellow eyes which are reflective, enabling enhanced night vision for hunting."
+    ],
+    "woman": [
+        "A woman typically appears as a human figure with distinct facial features, hair, and possibly in clothing or accessories.",
+        "Distinct features of a woman for recognition include hair, facial features, body shape, clothing, and gestures such as smiling or posing.",
+        "Facial features, hair length, body shape, and clothing style are key indicators to identify a woman in appearance.",
+        "Women typically have distinct facial features, hair, and body shapes, differentiating them from non-human objects or other individuals.",
+        "The visual cue unique to women is the presence of breasts, which are typically larger and more prominent than men's."
+    ],
+    "worm": [
+        "A worm is a small, legless creature with a long, slender body often found in soil or compost.",
+        "Long, slender body with no limbs, distinct segmented appearance, and often covered in mucus for smooth movement.",
+        "Long, slender body with no legs, distinct head shape, and possibly segmented appearance, typically found in soil or water.",
+        "Worms are elongated, slender, and have a soft, smooth body, unlike objects which have varied shapes, textures, and materials.",
+        "The flexible, elongated body with no limbs is unique to worms, making them distinct from other objects."
+    ]
+}

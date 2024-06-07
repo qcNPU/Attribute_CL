@@ -19,6 +19,7 @@ def parse_option():
     parser = argparse.ArgumentParser('Prompt Learning for CLIP', add_help=False)
 
     parser.add_argument("--root", type=str, default='/home/qc/dataset',help='root')
+    parser.add_argument("--gpt_dir", type=str, default='/home/qc/Original_AttriCLIP/dataset/gpt_data',help='root')
     parser.add_argument("--aug",type=str, default='flip', help='root')
 
     parser.add_argument("--mean_per_class", action='store_true', help='mean_per_class')
@@ -148,7 +149,7 @@ def main(args):
         print('finish fit')
         # torch.save(model.model.state_dict()['text_key'], os.path.join(args.save_path, 'text_key.pth.tar'))
         # torch.save(model.model.prompt_learner.state_dict()['text_prompt'], os.path.join(args.save_path, 'text_prompt.pth.tar'))
-        acc = model.accuracy(test_loader, args.num_test, test_class, mean_per_class=args.mean_per_class)
+        acc = model.accuracy(test_loader, ses, test_class, mean_per_class=args.mean_per_class)
         print('acc',acc)
 
         with open(args.save_path + "/memory_"+str(args.sess)+".pickle", 'wb') as handle:

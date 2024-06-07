@@ -138,7 +138,7 @@ class IncrementalDataset:
         min_class = sum(self.increments[:self._current_task])
         max_class = sum(self.increments[:self._current_task + 1])
 
-        
+        #源代码并没有用上面的order数组，而是直接用的顺序索引
         train_indices, for_memory = self.get_same_index(self.train_dataset.targets, list(range(min_class, max_class)), mode="train", memory=memory)
         test_indices, _ = self.get_same_index_test_chunk(self.test_dataset.targets, list(range(max_class)), mode="test")
         class_name = self.train_dataset.get_classes()
