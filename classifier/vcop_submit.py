@@ -144,17 +144,19 @@ class CLIP(nn.Module):
         super().__init__()
         self.n_class = len(class_names)
         self.args = args
+        self.text_key = text_key
+        self.logit_scale = clip_model.logit_scale
 
-        # text enoder
+        # 1. module 1：text prompt encoder
         self.text_encoder = TextEncoder(clip_model)
         if torch.cuda.device_count() > 1:
             self.text_encoder = nn.DataParallel(self.text_encoder)
-
+        # 2. module 2：template text enoder
+        self.template_encoder = TextEncoder(clip_model)
+        # 3. module 3：prompt learner
         self.prompt_learner = PromptLearner(self.args, class_names, clip_model, text_prompt, n_ctx=n_ctx)
-        self.text_key = text_key
-        # image encoder
+        # 4. module 4：image encoder
         self.image_encoder = clip_model.visual
-        self.logit_scale = clip_model.logit_scale
 
     def forward(self, image, num_test=None, test_class=None, test=False):
 
