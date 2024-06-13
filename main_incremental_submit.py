@@ -55,6 +55,7 @@ def parse_option():
     parser.add_argument("--memory", type=int, default=0, help='memory')
     parser.add_argument("--num_test", type=int, default=15, help='num_test_text')
     parser.add_argument("--num_prompt", type=int, default=10, help='num_prompt')
+    parser.add_argument("--ctx_len", type=int, default=12, help='every prompt contain 12 vectors')
     parser.add_argument("--text_prompt", type=int, default=3, help='text_prompt')
     parser.add_argument("--keep", type=bool, default=False, help='keep')#continue from other datasets
 
