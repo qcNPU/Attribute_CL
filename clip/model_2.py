@@ -420,15 +420,15 @@ def build_model(state_dict: dict):
     vit = "visual.proj" in state_dict
 
     if vit:
-        #卷积层输出通道
+        #卷积层输出通道                                    1024
         vision_width = state_dict["visual.conv1.weight"].shape[0]
         vision_layers = len(
-            [k for k in state_dict.keys() if k.startswith("visual.") and k.endswith(".attn.in_proj_weight")])
-        # 卷积层的核大小,14*14
+            [k for k in state_dict.keys() if k.startswith("visual.") and k.endswith(".attn.in_proj_weight")])#24层
+        # 卷积层的核大小,                                  14*14
         vision_patch_size = state_dict["visual.conv1.weight"].shape[-1]
-        # grid_size：根据位置嵌入的数量计算出网格大小。16*16,
+        # grid_size：根据位置嵌入的数量计算出网格大小。       16*16,   visual.positional_embedding：(257,1024)
         grid_size = round((state_dict["visual.positional_embedding"].shape[0] - 1) ** 0.5)#
-        # image_resolution：通过乘积计算图像分辨率。
+        # image_resolution：通过乘积计算图像分辨率。         224*224
         image_resolution = vision_patch_size * grid_size #224
 
 
@@ -442,16 +442,16 @@ def build_model(state_dict: dict):
         assert output_width ** 2 + 1 == state_dict["visual.attnpool.positional_embedding"].shape[0]
         image_resolution = output_width * 32
 
-    embed_dim = state_dict["text_projection"].shape[1]
-    context_length = state_dict["positional_embedding"].shape[0]
+    embed_dim = state_dict["text_projection"].shape[1]    #768,
+    context_length = state_dict["positional_embedding"].shape[0]#positional_embedding:(77,768)
     vocab_size = state_dict["token_embedding.weight"].shape[0]
     transformer_width = state_dict["ln_final.weight"].shape[0]
     transformer_heads = transformer_width // 64
     transformer_layers = len(set(k.split(".")[2] for k in state_dict if k.startswith(f"transformer.resblocks")))
     model = Original_CLIP(
-        # 768, 224, 24, 1024, 14
+        # 768,          224,        24,                 1024,               14
         embed_dim, image_resolution, vision_layers, vision_width, vision_patch_size,
-        # 77, vocab_size 49408, transformer_width 768, 12, 12
+        # 77,           49408,      768,                12,                 12
         context_length, vocab_size, transformer_width, transformer_heads, transformer_layers
     )
 

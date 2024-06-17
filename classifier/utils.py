@@ -54,12 +54,24 @@ class build_bicosine_scheduler:
         self.lr_prompt = lr_promt
 
 
-def cosine_loss(q,k):
+def cosine_loss(q,k):#q:(32,1,768) k:(64,3,768)
     # pdb.set_trace()
-    q = q.repeat(1,k.shape[1],1)
+    q = q.repeat(1,k.shape[1],1)#q:(32,1,768)->(32,3,768)
     # k = k.squeeze(1)
     # q = q/q.norm(dim=-1)
-    k_norm = k.norm(dim=-1,keepdim=True)
+    k_norm = k.norm(dim=-1,keepdim=True)#k:(64,3,768)->(64,3,1)
+    # pdb.set_trace()
+    # k_norm = k.norm(dim=-1).unsqueeze(1).repeat(1,k.shape[1])
+    k = k/k_norm
+    cos = ((q*k)/(k.shape[0]*k.shape[1])).sum()
+    return 1-cos
+
+def cosine_loss_cp(q,k):#q:(32,1,768) k:(64,3,768)
+    # pdb.set_trace()
+    # q = q.repeat(2,k.shape[1],1)#q:(32,1,768)->(32,3,768)/
+    # k = k.squeeze(1)
+    # q = q/q.norm(dim=-1)
+    k_norm = k.norm(dim=-1,keepdim=True)#k:(64,3,768)->(64,3,1)
     # pdb.set_trace()
     # k_norm = k.norm(dim=-1).unsqueeze(1).repeat(1,k.shape[1])
     k = k/k_norm
