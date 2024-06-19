@@ -460,5 +460,6 @@ def build_model(state_dict: dict):
             del state_dict[key]
 
     convert_weights(model)
+    # 这里加载了预训练模型的权重参数
     model.load_state_dict(state_dict)
     return model.eval()

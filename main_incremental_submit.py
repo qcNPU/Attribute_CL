@@ -4,6 +4,7 @@ import random
 import numpy as np
 import argparse
 import os
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1,2,3'
 import sys
 import math
 import time
@@ -37,7 +38,7 @@ def parse_option():
     # optimization setting
     parser.add_argument("--lr", type=float, default=1e-3, help='num_runs')
     parser.add_argument("--wd", type=float, default=0.0, help='num_runs')
-    parser.add_argument("--epochs", type=int, default=10, help='num_runs')
+    parser.add_argument("--epochs", type=int, default=2, help='num_runs')
     parser.add_argument("--train_batch", type=int, default=32, help='num_runs')
     parser.add_argument("--test_batch", type=int, default=32, help='num_runs')
 

@@ -11,7 +11,7 @@ from clip.simple_tokenizer import SimpleTokenizer as _Tokenizer
 _tokenizer = _Tokenizer()
 import dataset.incremental_dataloader
 
-from .utils import build_cosine_scheduler, cosine_loss
+from . import utils
 import time
 from dataset.gpt_generation import structure
 
@@ -51,11 +51,11 @@ class PromptLearner(nn.Module):
     def forward(self,indices_g,indices_a, test_class=None, infer=False):
         if infer:
             prompt_prefix =' '.join(['x'] * self.ctx_len * self.args.text_prompt)
+            # 将当前所有class制作cls token，与prompt拼接
             prompts = [prompt_prefix + ' ' + name + '.' for name in test_class]
             self.name_lens = [len(_tokenizer.encode(name)) for name in test_class]
 
-            self.prompt_pos = self.prompt_pos
-
+            # self.prompt_pos = self.prompt_pos
             tokenized_prompts = torch.cat([tokenize(p) for p in prompts])
             self.tokenized_prompts = tokenized_prompts
             with torch.no_grad():
@@ -74,7 +74,8 @@ class PromptLearner(nn.Module):
             prefix = self.token_prefix.unsqueeze(0).repeat(batch,1,1,1)#self.token_prefix:(10,1,768)   prefix:(32,10,1,768)
             suffix = self.token_suffix.unsqueeze(0).repeat(batch,1,1,1)#self.token_suffix:(10,40,768)  suffix:(32,10,40,768)
             ctx = ctx.unsqueeze(1).repeat(1, self.cls_num, 1, 1) #ctx:(32,10,72,768)
-            prompts = torch.cat([prefix, ctx, suffix],dim=2)#(32,10,113,768)
+            # todo 要么将context_length改为113，要么改token_suffix
+            prompts = torch.cat([prefix, ctx, suffix],dim=2)    #(32,10,113,768)
         elif self.prompt_pos == 1:
             prompts =[]
             half_n_ctx = self.ctx_len // 2
@@ -112,7 +113,7 @@ class PromptLearner(nn.Module):
             return prompts, tokenized_prompts, nc_prompts, nc_tokenized_prompts
 
     def only_prefix(self):
-        ctx = self.prompt_pool.global_prompt
+        ctx = torch.cat([self.prompt_pool.global_prompt,self.prompt_pool.attribute_prompt],dim=1)
         prompt_size = ctx.shape[0]
         nc_tokenized_prompts = self.nc_tokenized_prompts.repeat(prompt_size, 1)
         prefix = self.nc_token_prefix.repeat(prompt_size, 1, 1)
@@ -130,13 +131,37 @@ class TextEncoder(nn.Module):
         self.text_projection = clip_model.text_projection
         self.dtype = clip_model.dtype
 
-    def forward(self, x, tokenized_prompts):
-        x = x + self.positional_embedding.type(self.dtype)
+    def forward(self, x, tokenized_prompts,position=True):
+        if position:
+            x = x + self.positional_embedding.type(self.dtype)
         x = x.permute(1, 0, 2)
         x = self.transformer(x)
         x = x.permute(1, 0, 2)
         x = self.ln_final(x).type(self.dtype)
         x = x[torch.arange(x.shape[0]), tokenized_prompts.argmax(dim=-1)] @ self.text_projection
+        return x
+
+class Tempalte_TextEncoder(nn.Module):
+    def __init__(self, clip_model):
+        super().__init__()
+        self.transformer = clip_model.transformer
+        self.positional_embedding = clip_model.positional_embedding
+        self.ln_final = clip_model.ln_final
+        self.text_projection = clip_model.text_projection
+        self.dtype = clip_model.dtype
+        self.token_embedding= clip_model.token_embedding
+
+    def forward(self, texts):
+        x = self.token_embedding(texts).type(self.dtype)  # [batch_size, n_ctx, d_model]
+        x = x + self.positional_embedding.type(self.dtype)
+        x = x.permute(1, 0, 2)  # NLD -> LND
+        x = self.transformer(x)
+        x = x.permute(1, 0, 2)  # LND -> NLD
+        x = self.ln_final(x).type(self.dtype)
+
+        # x.shape = [batch_size, n_ctx, transformer.width]
+        # take features from the eot embedding (eot_token is the highest number in each sequence)
+        x = x[torch.arange(x.shape[0]), texts.argmax(dim=-1)] @ self.text_projection
         return x
 
 
@@ -145,12 +170,13 @@ def getTaskAttributeEmbedding(args,class_names,clip_model,text_encoder):
 
     with torch.no_grad():
         # 遇到DataParallel’ object has no attribute ‘xxxx’时，在model后面加上.module.
-        tokenized_keys = torch.cat([tokenize(p) for p in entities]).cuda()
-        entity_embeddings = clip_model.token_embedding(tokenized_keys).type(clip_model.dtype)
-        entity_embeddings = text_encoder(entity_embeddings, tokenized_keys)
+        tokenized_keys = torch.cat([tokenize(p) for p in entities]).cuda()#（238,77）
+        entity_embeddings = clip_model.token_embedding(tokenized_keys).type(clip_model.dtype)#（238,77,768）
+        # entity_embeddings = text_encoder(entity_embeddings, tokenized_keys,False)
+        entity_embeddings,_ = entity_embeddings.max(dim=1)
         entity_embeddings /= entity_embeddings.norm(dim=-1, keepdim=True)  # 归一化
 
-    return entity_embeddings
+    return [list(entities),entity_embeddings.detach()]
 
 
 class PromptPool:
@@ -162,35 +188,32 @@ class PromptPool:
 
 
 class CLIP(nn.Module):
-    def __init__(self, args, class_names, clip_model, global_key, global_prompt, ctx_len=12):
+    def __init__(self, args, class_names, clip_model, global_key, taskEntities, ctx_len=12):
         super().__init__()
         self.class_num = len(class_names)
         self.args = args
+        self.taskEntities = taskEntities
+        self.class_names = class_names
         self.logit_scale = clip_model.logit_scale
+        # self.logit_scale = nn.Parameter(torch.tensor(4.6052))
         self.ctx_dim = clip_model.ln_final.weight.shape[0]
 
         # 1. module 1：text prompt encoder
         self.text_encoder = TextEncoder(clip_model)
-        self.global_key = global_key
-        self.global_prompt = global_prompt
+        self.global_key = global_key.global_key
+        self.global_prompt = global_key.global_prompt
+        self.attribute_key = global_key.attribute_key
+        self.attribute_prompt = global_key.attribute_prompt
         # 1.1 将attribute送入text encoder，得到feautre，作为attribute key；
-        self.attribute_key = getTaskAttributeEmbedding(args,class_names,clip_model,self.text_encoder)  # (260,768)
-
+        # attribute_key = getTaskAttributeEmbedding(args, class_names, clip_model, self.text_encoder)  # (260,768)
         if torch.cuda.device_count() > 1:
             self.text_encoder = nn.DataParallel(self.text_encoder)
 
-        # 3. 初始化对应数量的attribute prompt   ,n_ctx：上下文长度，ctx_dim：上下文维度 n_cls：类别数量 name_lens：每个类别名称的长度
-        attribute_prompt = torch.empty(self.attribute_key.shape[0], ctx_len, self.ctx_dim, dtype=clip_model.dtype).cuda()
-        nn.init.normal_(attribute_prompt, std=0.02)
-        attribute_prompt = nn.Parameter(attribute_prompt)
-        self.attribute_prompt = attribute_prompt
-
         # 2. module 2：text template enoder
-        self.template_encoder = TextEncoder(clip_model)
+        self.template_encoder = Tempalte_TextEncoder(clip_model)
 
-        self.prompt_pool = PromptPool(self.global_key,self.global_prompt,self.attribute_key,self.attribute_prompt)
         # 3. module 3：prompt learner
-        self.prompt_learner = PromptLearner(self.args, class_names, clip_model, self.prompt_pool, ctx_len=ctx_len)
+        self.prompt_learner = PromptLearner(self.args, class_names, clip_model, global_key, ctx_len=ctx_len)
 
         # 4. module 4：image encoder
         self.image_encoder = clip_model.visual
@@ -200,47 +223,70 @@ class CLIP(nn.Module):
         with torch.no_grad():
             image_features = self.image_encoder(image.type(self.dtype))#image:(32,3,32,32)
             image_features = image_features / image_features.norm(dim=-1, keepdim=True)
-            image_features = image_features.detach()
+            image_features = image_features.detach()#（32,768）
+
+        # combined_keys = torch.cat((self.global_key, self.attribute_keys), dim=1)
+        probability_g = image_features @ self.global_key.t()  # (32,768)  (10,768)
+        _, indices_g = probability_g.topk(k=min(self.args.text_prompt, probability_g.shape[1]), dim=1,largest=True)  # (32,3)
+        key_choose_g = self.global_key[indices_g]  # (32,3,768)
+
+        probability_a = image_features @ self.attribute_key.t()
+        _, indices_a = probability_a.topk(k=min(self.args.text_prompt, probability_a.shape[1]), dim=1, largest=True)
+        key_choose_a = self.attribute_key[indices_a]
+
+        probability_e = image_features @ self.taskEntities[1].t()  # (32,768)  (10,768)
+        _, indices_e = probability_e.topk(k=min(self.args.text_prompt, probability_e.shape[1]), dim=1,largest=True)  # (32,3)
+        entity_choose = self.taskEntities[1][indices_e]  #indices：（32,3） (32,3,768)
+        indices_numpy = indices_e.cpu().numpy()
+        list1=[]
+        for i in range(image_features.shape[0]):
+            list2  =[]
+            for j in indices_e[i,:]:
+                list2.append(self.taskEntities[0][j])
+            text_descriptions = [f"A photo of a {label} with attributes of " + " ,".join(list2) for label in
+                                 self.class_names]
+            list1.append(text_descriptions)
+        text_tokens = torch.cat([tokenize(t).cuda() for t in list1])
+
+        # 提取文本特征
+        with torch.no_grad():
+            tempalte_feature = self.template_encoder(text_tokens)
+            tempalte_feature /= tempalte_feature.norm(dim=-1, keepdim=True)#(320,768)
+
 
         if not test:
-            # combined_keys = torch.cat((self.global_key, self.attribute_keys), dim=1)
-            probability_g = image_features @ self.global_key.t()    #(32,768)  (10,768)
-            _, indices_g = probability_g.topk(k=min(self.args.text_prompt, probability_g.shape[1]), dim=1, largest=True)#(32,3)
-            key_choose_g = self.global_key[indices_g]#(32,3,768)
+            text_prompt, tokenized_prompts, nc_prompts, nc_tokenized_prompts = self.prompt_learner(indices_g, indices_a)
+            text_features = self.text_encoder(text_prompt, tokenized_prompts)  # (320,77,768)  (320,77)
+            text_features = text_features / text_features.norm(dim=-1, keepdim=True)#(320,768)
 
-            probability_a = image_features @ self.attribute_key.t()
-            _, indices_a = probability_a.topk(k=min(self.args.text_prompt, probability_a.shape[1]), dim=1, largest=True)
-            key_choose_a = self.attribute_key[indices_a]
-
-            text_prompt, tokenized_prompts, nc_prompts, nc_tokenized_prompts = self.prompt_learner(indices_g,indices_a)
-            text_features = self.text_encoder(text_prompt, tokenized_prompts) # (320,113,768)  (320,77)
-            text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+            logit_scale = self.logit_scale.exp()
+            #这里.sum(dim=-1)和.softmax(dim=-1)的区别在哪儿
+            # cosine_sim = logit_scale*(text_features * tempalte_feature).sum(dim=-1)
+            # cosine_sim = cosine_sim.view(image_features.shape[0],-1)
+            cosine_sim = 1-((tempalte_feature*text_features)/(text_features.shape[0]*text_features.shape[1])).sum()
+            # cosine_sim=None
+            # entity_choose = None
             text_features = text_features.view(image_features.shape[0], self.class_num, -1)
             image_features = image_features.unsqueeze(1)
-            logit_scale = self.logit_scale.exp()
             logits = logit_scale * (image_features * text_features).sum(-1)
 
             nc_text_features = self.text_encoder(nc_prompts, nc_tokenized_prompts)
             nc_text_features = nc_text_features / nc_text_features.norm(dim=-1, keepdim=True)
             dis = nc_text_features @ nc_text_features.permute(1, 0)
             loss_m = dis[~torch.eye(self.args.num_prompt, dtype=torch.bool, device='cuda')].abs().mean()
+            key_choose = [key_choose_g,key_choose_a,entity_choose]
 
-            key_choose = torch.cat(key_choose_g,key_choose_a)
-
-            return logits, image_features, key_choose, loss_m
+            return logits, image_features, key_choose, loss_m,cosine_sim
         else:
-            n_test = len(test_class)
-            probability_g = image_features @ self.text_key.t()
-            _, indices_g = probability_g.topk(k=min(self.args.text_prompt,probability_g.shape[1]), dim=1, largest=True)
-
-            text_prompt, tokenized_prompts = self.prompt_learner(indices_g,test_class,test)
+            text_prompt, tokenized_prompts = self.prompt_learner(indices_g, indices_a,test_class,test)
             text_features = self.text_encoder(text_prompt,tokenized_prompts)
             text_features = text_features / text_features.norm(dim=-1, keepdim=True)
             logit_scale = self.logit_scale.exp()
-            text_features = text_features.view(image_features.shape[0], n_test, -1)
+            text_features = text_features.view(image_features.shape[0], len(test_class), -1)
             image_features = image_features.unsqueeze(1)
             logit_scale = self.logit_scale.exp()
             logits = logit_scale * (image_features * text_features).sum(-1)
+
             return logits
 
 
@@ -266,14 +312,14 @@ class CoOp:
         self.args = args
         dtype = clip_model.dtype
         self.dtype = dtype
-        ctx_dim = clip_model.ln_final.weight.shape[0]
+        self.ctx_dim = clip_model.ln_final.weight.shape[0]
 
         # 1. 初始化prompt pool
         # 1.1 global key：（keyNum, ctx_dim）——（key数量 ，每个vector为多少维）
-        text_key = torch.empty(self.num_prompt, ctx_dim, dtype=self.dtype).cuda()
+        text_key = torch.empty(self.num_prompt, self.ctx_dim, dtype=self.dtype).cuda()
         nn.init.normal_(text_key, std=0.02)
         # 1.2 global prompt：（keyNum, ctx_len, ctx_dim）——（key数量，每个prompt包含几个learnable vector，每个vector为多少维）
-        text_prompt = torch.empty(self.num_prompt, self.ctx_len, ctx_dim, dtype=self.dtype).cuda()
+        text_prompt = torch.empty(self.num_prompt, (self.ctx_len//2), self.ctx_dim, dtype=self.dtype).cuda()
         nn.init.normal_(text_prompt, std=0.02)
 
         if  keep == True :
@@ -282,6 +328,15 @@ class CoOp:
         else:
             self.text_key = nn.Parameter(text_key)
             self.text_prompt = nn.Parameter(text_prompt)
+
+        attribute_key = torch.empty(self.num_prompt, self.ctx_dim, dtype=self.dtype).cuda()
+        nn.init.normal_(attribute_key, std=0.02)
+        self.attribute_key = nn.Parameter(attribute_key)
+        # 3. 初始化对应数量的attribute prompt   ,n_ctx：上下文长度，ctx_dim：上下文维度 n_cls：类别数量 name_lens：每个类别名称的长度
+        attribute_prompt = torch.empty(self.num_prompt, (self.ctx_len//2), self.ctx_dim, dtype=clip_model.dtype).cuda()
+        nn.init.normal_(attribute_prompt, std=0.02)
+        self.attribute_prompt = nn.Parameter(attribute_prompt)
+        self.prompt_pool = PromptPool(self.text_key, self.text_prompt, self.attribute_key, self.attribute_prompt)
 
 
 
@@ -301,7 +356,8 @@ class CoOp:
 
         per_epoch_steps = len(train_loader)
 
-        self.init_model(class_names=data['class_names'], per_epoch_steps=per_epoch_steps,text_key=self.text_key, text_prompt=self.text_prompt)
+        taskEntities = getTaskAttributeEmbedding(args=self.args,class_names=data['class_names'],clip_model=self.clip_model,text_encoder=None)
+        self.init_model(class_names=data['class_names'], per_epoch_steps=per_epoch_steps,text_key=self.prompt_pool, text_prompt=taskEntities)
 
         self.model.eval()
 
@@ -310,21 +366,24 @@ class CoOp:
             loop.set_description(f'Epoch [{epoch}/{self.epochs}]')
             for idx, (x, y) in enumerate(loop):
                 
-                y = y - self.args.class_per_task * self.args.sess
+                y = (y - self.args.class_per_task * self.args.sess).cuda()
                 lab_idx = y.cpu().numpy().tolist()
                 cur_iter_idx = epoch*per_epoch_steps+idx
                 self.cur_iter_idx = cur_iter_idx
                 self.scheduler.step(cur_iter_idx)
 
-                output, ima_feat, key_choose, loss_m = self.model(x.cuda())
-                
-                loss_main = F.cross_entropy(output, y.cuda())
-                loss_k = cosine_loss(ima_feat,key_choose)
-                loss = loss_main + 0.7*loss_k + 0.3*loss_m
+                output, ima_feat, key_choose, loss_m,cosine_sim = self.model(x.cuda())
+                # loss_main:text prompt与image；loss_k：image和glo key；
+                # loss_a：attr key和attr emb；cosine_sim：
+                loss_main = F.cross_entropy(output, y)
+                loss_k = utils.cosine_loss(ima_feat,key_choose[0])
+                loss_a = utils.cosine_loss_cp(key_choose[1],key_choose[2])
+                loss = loss_main + 0.7*loss_k/3 + 0.3*loss_m+0.7*loss_a/3 +0.7*cosine_sim/3
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
+            print(f'Epoch [{epoch + 1}/{self.epochs}], Loss: {loss.item():.4f}')
 
 
     def init_model(self, class_names, per_epoch_steps, text_key, text_prompt):
@@ -339,12 +398,15 @@ class CoOp:
             except:
                 self.model.text_encoder.module.transformer.use_gradient_checkpoint = True
 
-        Other_params = [param for name, param in self.model.named_parameters() if 'text_key' in name]
-        param_dict = [{'params': [p for p in self.model.prompt_learner.parameters() if p.requires_grad]}, 
-                        {'params': Other_params}]
+        grad_param = ['global_key','global_prompt','attribute_key','attribute_prompt']
+        Other_params = [param for name, param in self.model.named_parameters() if name in grad_param]
+        param_dict = [  {'params': [p for p in self.model.prompt_learner.parameters() if p.requires_grad]},
+                        {'params': Other_params},
+                        # {'params': self.model.logit_scale}  ]
+                        ]
 
         self.optimizer = torch.optim.SGD(param_dict, lr=self.lr, weight_decay=self.wd)
-        self.scheduler = build_cosine_scheduler(
+        self.scheduler = utils.build_cosine_scheduler(
             self.optimizer,
             lr=self.lr,
             total_step=self.epochs*per_epoch_steps)
@@ -376,9 +438,6 @@ class CoOp:
         total_count=0
         acc_count =0
 
-        taskclassMap = {}
-        for t in range(ses):
-            taskclassMap[t]= list(range(t*self.args.class_per_task,(t+1)*self.args.class_per_task))
         for i,(x, y) in enumerate(loader):
             pred_y = self.inference(x.cuda(), ses, test_class)
             _, top_labels = pred_y.topk(1, dim=-1)
