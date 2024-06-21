@@ -57,7 +57,7 @@ def parse_option():
     parser.add_argument("--num_test", type=int, default=15, help='num_test_text')
     parser.add_argument("--num_prompt", type=int, default=10, help='num_prompt')
     parser.add_argument("--ctx_len", type=int, default=12, help='every prompt contain 12 vectors')
-    parser.add_argument("--text_prompt", type=int, default=3, help='text_prompt')
+    parser.add_argument("--text_prompt", type=int, default=3, help='top-K的value K')
     parser.add_argument("--keep", type=bool, default=False, help='keep')#continue from other datasets
 
 
@@ -139,8 +139,8 @@ def main(args):
             inc_dataset.sample_per_task_testing = sample_per_task_testing
             args.sample_per_task_testing = sample_per_task_testing             
             
-        print('ses:',ses)
-        print(task_info)    
+        print('task:',(ses+1))
+        print(task_info)
         print(inc_dataset.sample_per_task_testing)     # dict{task:len(test)}
         args.sample_per_task_testing = inc_dataset.sample_per_task_testing
         len_train = task_info['n_train_data']

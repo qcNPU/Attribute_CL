@@ -133,8 +133,6 @@ class IncrementalDataset:
     
 
     def new_task(self, memory=None):
-        print(self._current_task)
-        print(self.increments)
         min_class = sum(self.increments[:self._current_task])
         max_class = sum(self.increments[:self._current_task + 1])
 
@@ -144,16 +142,14 @@ class IncrementalDataset:
         class_name = self.train_dataset.get_classes()
         test_class = class_name[:max_class]
         class_name = class_name[min_class:max_class]
-        
 
         self.train_data_loader = torch.utils.data.DataLoader(self.train_dataset, batch_size=self._batch_size,shuffle=False,num_workers=self._workers, sampler=SubsetRandomSampler(train_indices, True))
         self.test_data_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=self.args.test_batch,shuffle=False,num_workers=self._workers, sampler=SubsetRandomSampler(test_indices, False))
 
-        
         task_info = {
             "min_class": min_class,
             "max_class": max_class,
-            "task": self._current_task,
+            "task": self._current_task+1,
             "max_task": len(self.increments),
             "n_train_data": len(train_indices),
             "n_test_data": len(test_indices)
