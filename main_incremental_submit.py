@@ -4,7 +4,7 @@ import random
 import numpy as np
 import argparse
 import os
-# os.environ['CUDA_VISIBLE_DEVICES'] = '1,2,3'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1,2,3'
 import sys
 import math
 import time
@@ -38,7 +38,7 @@ def parse_option():
     # optimization setting
     parser.add_argument("--lr", type=float, default=1e-3, help='num_runs')
     parser.add_argument("--wd", type=float, default=0.0, help='num_runs')
-    parser.add_argument("--epochs", type=int, default=2, help='num_runs')
+    parser.add_argument("--epochs", type=int, default=5, help='num_runs')
     parser.add_argument("--train_batch", type=int, default=32, help='num_runs')
     parser.add_argument("--test_batch", type=int, default=32, help='num_runs')
 
@@ -129,7 +129,7 @@ def main(args):
     memory = None
     
     for ses in range(start_sess, args.num_task):
-        task_info, train_loader, class_name, test_class, val_loader, test_loader, for_memory = inc_dataset.new_task(memory) 
+        task_info, train_loader, train_class_name, test_loader, test_class_name, val_loader, for_memory = inc_dataset.new_task(memory)
         
         args.sess=ses         
         if(start_sess==ses and start_sess!=0): 
@@ -144,14 +144,13 @@ def main(args):
         print(inc_dataset.sample_per_task_testing)     # dict{task:len(test)}
         args.sample_per_task_testing = inc_dataset.sample_per_task_testing
         len_train = task_info['n_train_data']
-        
 
-        data = {'train_loader': train_loader, 'class_names': class_name}
+        data = {'train_loader': train_loader, 'train_class_name': train_class_name, 'test_class_name': test_class_name}
         model.fit(data,len_train)
         print('finish fit')
         # torch.save(model.model.state_dict()['text_key'], os.path.join(args.save_path, 'text_key.pth.tar'))
         # torch.save(model.model.prompt_learner.state_dict()['text_prompt'], os.path.join(args.save_path, 'text_prompt.pth.tar'))
-        acc = model.accuracy(test_loader, ses, test_class, mean_per_class=args.mean_per_class)
+        acc = model.accuracy(test_loader, ses, test_class_name)
         print('acc',acc)
 
         with open(args.save_path + "/memory_"+str(args.sess)+".pickle", 'wb') as handle:

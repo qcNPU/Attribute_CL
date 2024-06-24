@@ -139,9 +139,9 @@ class IncrementalDataset:
         #源代码并没有用上面的order数组，而是直接用的顺序索引
         train_indices, for_memory = self.get_same_index(self.train_dataset.targets, list(range(min_class, max_class)), mode="train", memory=memory)
         test_indices, _ = self.get_same_index_test_chunk(self.test_dataset.targets, list(range(max_class)), mode="test")
-        class_name = self.train_dataset.get_classes()
-        test_class = class_name[:max_class]
-        class_name = class_name[min_class:max_class]
+        all_class_name = self.train_dataset.get_classes()
+        train_class_name = all_class_name[min_class:max_class]
+        test_class_name = all_class_name[:max_class]
 
         self.train_data_loader = torch.utils.data.DataLoader(self.train_dataset, batch_size=self._batch_size,shuffle=False,num_workers=self._workers, sampler=SubsetRandomSampler(train_indices, True))
         self.test_data_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=self.args.test_batch,shuffle=False,num_workers=self._workers, sampler=SubsetRandomSampler(test_indices, False))
@@ -157,7 +157,7 @@ class IncrementalDataset:
 
         self._current_task += 1
 
-        return task_info, self.train_data_loader, class_name, test_class, self.test_data_loader, self.test_data_loader, for_memory
+        return task_info, self.train_data_loader, train_class_name, self.test_data_loader, test_class_name, self.test_data_loader, for_memory
     
      
 

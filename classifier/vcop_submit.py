@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+from torchvision import transforms
 
 from tqdm import tqdm
 from copy import deepcopy
@@ -187,11 +188,11 @@ class PromptPool:
 
 
 class CLIP(nn.Module):
-    def __init__(self, args, class_names, clip_model, prompt_pool, taskEntities, ctx_len=12):
+    def __init__(self, args, class_names, clip_model, prompt_pool, cls_en_map, ctx_len=12):
         super().__init__()
         self.class_num = len(class_names)
         self.args = args
-        self.taskEntities = taskEntities
+        self.cls_en_map = cls_en_map
         self.class_names = class_names
         self.logit_scale = clip_model.logit_scale
         # self.logit_scale = nn.Parameter(torch.tensor(4.6052))
@@ -232,50 +233,25 @@ class CLIP(nn.Module):
             text_prompt, tokenized_prompts, nc_prompts, nc_tokenized_prompts = self.prompt_learner(indices_g)
             text_features = self.text_encoder(text_prompt, tokenized_prompts)  # (320,77,768)  (320,77)
             text_features = text_features / text_features.norm(dim=-1, keepdim=True)#(320,768)
-
-            embed_choose = []
-            batch_tempaltes = []
-            attr_choose=[]
-            # 3. 每个image feature与对应class的Attribute embed做匹配
-            for i in range(batch):
-                # 3.1 取出feature和label，
-                ima_fea = image_features[i:i + 1, :]
-                lab = labels[i].item()
-                # 3.2 取出该class 的attr str和attr embed
-                ent_str = self.taskEntities[0][lab]
-                ent_embed = self.taskEntities[1][lab]  # (attriNum,768)
-                # 3.3 feature与attr embed做匹配，选出3个attribute 后
-                probability_e = ima_fea @ ent_embed.t()  # (1,768)  (attriNum,768)
-                _, indices_e = probability_e.topk(k=min(self.args.text_prompt, probability_e.shape[1]), dim=1,
-                                                  largest=True)  # (32,3)
-                # 3.4 记录匹配的attr str和attr embed
-                entity_choose = ent_embed[indices_e]  # indices：（32,3） (32,3,768)
-                embed_choose.append(entity_choose)
-                attr_strs = []
-                for j in indices_e.squeeze(0):
-                    attr_strs.append(self.taskEntities[0][lab][j])
-                attr_choose.append(attr_strs)
-                # 3.5 组装template text
-                tempaltes = [f"A photo of a {label} with attributes of " + " ,".join(attr_strs) for label in
-                             self.class_names]
-                batch_tempaltes.append(tempaltes)
-
-            batch_choose = torch.cat(embed_choose)  # (32,3,768)
+            #batch_tempaltes:list,list :32,10
+            embed_choose, batch_tempaltes, attr_choose = self.show_image_attrs(batch,image_features,labels,test)
             text_tokens = torch.cat([tokenize(t).cuda() for t in batch_tempaltes])  # (320,77)
             # 提取文本特征
             with torch.no_grad():
                 tempalte_feature = self.template_encoder(text_tokens)
                 tempalte_feature /= tempalte_feature.norm(dim=-1, keepdim=True)  # (320,768)
+            batch_choose = torch.cat(embed_choose)  # (32,3,768)
 
             #loss1：两个text encoder的feature的拉近，目的：为Attribute prompt赋予物理意义
             logit_scale = self.logit_scale.exp()
-            # cosine_sim = logit_scale*(text_features * tempalte_feature).sum(dim=-1)
-            # cosine_sim = cosine_sim.view(image_features.shape[0],-1)
-            loss_tt = 1-((tempalte_feature*text_features)/(text_features.shape[0]*text_features.shape[1])).sum()
+            # todo 这里不能是cosine相似度来拉近，而是要用prompt feature与正确class的template feature得到的概率最大
+            # loss_tt = 1-((tempalte_feature*text_features)/(text_features.shape[0]*text_features.shape[1])).sum()
 
+            image_features = image_features.unsqueeze(1)#(32,1,768)
+            tempalte_feature = tempalte_feature.view(image_features.shape[0], self.class_num, -1)
+            loss_tt = logit_scale * (image_features * tempalte_feature).sum(-1)
             #计算logits（未归一化的预测值）
             text_features = text_features.view(image_features.shape[0], self.class_num, -1)
-            image_features = image_features.unsqueeze(1)
             logits = logit_scale * (image_features * text_features).sum(-1)
 
             # loss2：prompt之间的正交性约束
@@ -288,6 +264,7 @@ class CLIP(nn.Module):
 
             return logits, image_features, key_choose, loss_m,loss_tt
         else:
+            embed_choose, batch_tempaltes, attr_choose = self.show_image_attrs(batch, image_features, labels,test)
             text_prompt, tokenized_prompts = self.prompt_learner(indices_g,test_class,test)
             text_features = self.text_encoder(text_prompt,tokenized_prompts)
             text_features = text_features / text_features.norm(dim=-1, keepdim=True)
@@ -296,16 +273,45 @@ class CLIP(nn.Module):
             image_features = image_features.unsqueeze(1)
             logit_scale = self.logit_scale.exp()
             logits = logit_scale * (image_features * text_features).sum(-1)
-
-            return logits
+            return [logits,attr_choose]
 
 
     @property
     def dtype(self):
         return self.image_encoder.conv1.weight.dtype
 
+    def show_image_attrs(self, batch, image_features, labels,test):
+        embed_choose = []
+        batch_tempaltes = []
+        attr_choose = []
+        labels = labels if test else (labels + self.args.class_per_task * self.args.sess)
+        # 3. 每个image feature与对应class的Attribute embed做匹配
+        for i in range(batch):
+            # 3.1 取出feature和label，
+            ima_fea = image_features[i:i + 1, :]
+            lab = labels[i].item()
+            # 3.2 取出该class 的attr str和attr embed
+            ent_str = self.cls_en_map[0][lab]
+            ent_embed = self.cls_en_map[1][lab]  # (attriNum,768)
+            # 3.3 feature与attr embed做匹配，选出3个attribute 后
+            probability_e = ima_fea @ ent_embed.t()  # (1,768)  (attriNum,768)
+            _, indices_e = probability_e.topk(k=min(self.args.text_prompt, probability_e.shape[1]), dim=1,
+                                              largest=True)  # (32,3)
+            # 3.4 记录匹配的attr str和attr embed
+            entity_choose = ent_embed[indices_e]  # indices：（32,3） (32,3,768)
+            embed_choose.append(entity_choose)
+            attr_strs = []
+            for j in indices_e.squeeze(0):
+                attr_strs.append(self.cls_en_map[0][lab][j.item()])
+            attr_choose.append(attr_strs)
+            # 3.5 组装template text
+            tempaltes = [f"A photo of a {label} with attributes of " + " ,".join(attr_strs) for label in
+                         self.class_names]
+            batch_tempaltes.append(tempaltes)
+        return embed_choose,batch_tempaltes,attr_choose
 
-def showImage_attr(images , attributes , grid_size=(3, 3)):
+
+def image_display(images, attributes,prefix, grid_size=(3, 3)):
     """
     显示图片网格及其对应的 Attribute 字符串
 
@@ -313,21 +319,29 @@ def showImage_attr(images , attributes , grid_size=(3, 3)):
     :param attributes: 图片对应的 Attribute 字符串列表
     :param grid_size: 网格的行列数 (rows, cols)
     """
-    rows, cols = grid_size
-    fig, axes = plt.subplots(rows, cols, figsize=(32, 32))
+    nrow = 8
     # 将张量转换为 numpy 数组并归一化到 [0, 1]
-    image_np = images.cpu().numpy()
-    image_np = (image_np - image_np.min()) / (image_np.max() - image_np.min())
-    for i in range(rows * cols):
-        if i < len(images):
-            img = image_np[i:i+1,:,:].squeeze(0).transpose(1, 2, 0)  # 将图像张量转换为numpy数组
-            axes[i // cols, i % cols].imshow(img)
-            axes[i // cols, i % cols].set_title(";".join(attributes[i]),fontsize=40)
-            axes[i // cols, i % cols].axis('off')
-        else:
-            axes[i // cols, i % cols].axis('off')  # 如果没有足够的图片，隐藏多余的子图
+    image_np = (images - images.min()) / (images.max() - images.min())
+    num_images = len(images)
+    ncol = (num_images + nrow - 1) // nrow
+    fig, axes = plt.subplots(ncol, nrow, figsize=(32, 22))
 
-    plt.show()
+    for i in range(num_images):
+        row = i // nrow
+        col = i % nrow
+        ax = axes[row, col]
+        img = image_np[i].permute(1, 2, 0).cpu().numpy()
+        ax.imshow(img)
+        ax.set_title("\n".join(attributes[i]), fontsize=25)
+        ax.axis('off')
+
+    # Hide any unused subplots
+    for i in range(num_images, ncol * nrow):
+        fig.delaxes(axes.flat[i])
+
+    plt.subplots_adjust(wspace=0.1, hspace=0.6)
+    fig.savefig(f"{prefix}.png")
+    plt.close(fig)
 
 class CoOp:
     def __init__(self, prev_key, prev_prompt, args, use_float32=False, use_grad_checkpoint=False, keep=False):
@@ -378,10 +392,12 @@ class CoOp:
     def fit(self, data, len_train):
 
         train_loader = data['train_loader']
+        train_class_name = data['train_class_name']
+        test_class_name = data['test_class_name']
         per_epoch_steps = len(train_loader)
 
-        taskEntities = getTaskAttributeEmbedding(args=self.args,class_names=data['class_names'],clip_model=self.clip_model,text_encoder=None)
-        self.init_model(class_names=data['class_names'], per_epoch_steps=per_epoch_steps, text_key=self.prompt_pool, cls_en_map=taskEntities)
+        cls_en_map = getTaskAttributeEmbedding(args=self.args,class_names=test_class_name,clip_model=self.clip_model,text_encoder=None)
+        self.init_model(class_names=train_class_name, per_epoch_steps=per_epoch_steps, text_key=self.prompt_pool, cls_en_map=cls_en_map)
         self.model.eval()
 
         for epoch in range(self.epochs):
@@ -393,14 +409,16 @@ class CoOp:
                 cur_iter_idx = epoch*per_epoch_steps+idx
                 self.scheduler.step(cur_iter_idx)
 
-                output, ima_feat, key_choose, loss_m,loss_tt = self.model(x.cuda(),y)
+                logits_it, ima_feat, key_choose, loss_m,logits_tt = self.model(x.cuda(),y)
                 # loss_main:text prompt与image；loss_k：image和glo key；
                 # loss_a：attr key和attr emb；cosine_sim：
-                loss_main = F.cross_entropy(output, y)
+                loss_main = F.cross_entropy(logits_it, y)
+                loss_tt = F.cross_entropy(logits_tt, y)
                 loss_k = utils.cosine_loss(ima_feat,key_choose[0])#(32,1,768) (32,3,768)
                 loss_a = utils.cosine_loss_cp(key_choose[1],key_choose[2])#(32,3,768),(32,3,768)
                 loss = loss_main + 0.7*loss_k + 0.3*loss_m+0.7*loss_a + loss_tt
-                showImage_attr(x, key_choose[3])
+                # if epoch == self.epochs-1:
+                #     image_display(x, key_choose[3],"train ")
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
@@ -432,13 +450,13 @@ class CoOp:
             total_step=self.epochs*per_epoch_steps)
 
     @torch.no_grad()
-    def accuracy(self, loader, num_test, test_class, mean_per_class=False):
+    def accuracy(self, loader, task, test_class, mean_per_class=False):
         if mean_per_class:
-            return self._accuracy_mpc(loader, num_test, test_class)
+            return self._accuracy_mpc(loader, task, test_class)
         else:
             #因为每个class的test数量是一样的，所以data-level的平均和task-level的结果一样
             # print("taskMean acc",self._accuracy_mean_task(loader, num_test, test_class))
-            return self._accuracy(loader, num_test, test_class)
+            return self._accuracy(loader, task, test_class)
 
     def _accuracy_mpc(self, loader, num_test, test_class):
         n_class = self.n_class
@@ -454,12 +472,12 @@ class CoOp:
         acc = np.array(acc).mean()
         return acc
 
-    def _accuracy(self, loader, ses, test_class):
+    def _accuracy(self, loader, task, test_class):
         total_count=0
         acc_count =0
 
         for i,(x, y) in enumerate(loader):
-            pred_y = self.inference(x.cuda(), y.cuda(),ses, test_class)
+            pred_y = self.inference(x.cuda(), y.cuda(), task, test_class,i)
             _, top_labels = pred_y.topk(1, dim=-1)
             acc_count += (top_labels.view(-1)==y.cuda()).sum().cpu().numpy()
 
@@ -487,9 +505,12 @@ class CoOp:
 
 
     @torch.no_grad()
-    def inference(self,image, labels,num_test, test_class):
-        logits = self.model(image, labels,num_test, test_class, test=True)
-        return logits.float().softmax(dim=-1)
+    def inference(self, image, labels, task, test_class,batchIn):
+        logits = self.model(image, labels, task, test_class, test=True)
+        if (batchIn+1)%10==0:
+            image_display(image, logits[1],"Task"+str(task+1)+ "-"+"batch"+str(batchIn+1)+test_class[0]+" "+test_class[-1])
+
+        return logits[0].float().softmax(dim=-1)
 
 def getTaskEntitys(args, train_classnames):
     # 取出task中所有class的entity和attribute，合并去重
