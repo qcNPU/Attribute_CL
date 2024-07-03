@@ -139,9 +139,9 @@ def main(args):
             inc_dataset.sample_per_task_testing = sample_per_task_testing
             args.sample_per_task_testing = sample_per_task_testing             
             
-        print('task:',(ses+1))
+        # print('ses:',ses)
         print(task_info)
-        print(inc_dataset.sample_per_task_testing)     # dict{task:len(test)}
+        # print(inc_dataset.sample_per_task_testing)     # dict{task:len(test)}
         args.sample_per_task_testing = inc_dataset.sample_per_task_testing
         len_train = task_info['n_train_data']
 
@@ -151,16 +151,16 @@ def main(args):
         # torch.save(model.model.state_dict()['text_key'], os.path.join(args.save_path, 'text_key.pth.tar'))
         # torch.save(model.model.prompt_learner.state_dict()['text_prompt'], os.path.join(args.save_path, 'text_prompt.pth.tar'))
         acc = model.accuracy(test_loader, ses, test_class_name)
-        print('acc',acc)
+        print('acc',np.array(acc).mean(),",task acc",acc)
 
-        with open(args.save_path + "/memory_"+str(args.sess)+".pickle", 'wb') as handle:
-            pickle.dump(memory, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # with open(args.save_path + "/memory_"+str(args.sess)+".pickle", 'wb') as handle:
+        #     pickle.dump(memory, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        with open(args.save_path + "/acc_task_"+str(args.sess)+".pickle", 'wb') as handle:
-            pickle.dump(acc, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # with open(args.save_path + "/acc_task_"+str(args.sess)+".pickle", 'wb') as handle:
+        #     pickle.dump(acc, handle, protocol=pickle.HIGHEST_PROTOCOL)
             
-        with open(args.save_path + "/sample_per_task_testing_"+str(args.sess)+".pickle", 'wb') as handle:
-            pickle.dump(args.sample_per_task_testing, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # with open(args.save_path + "/sample_per_task_testing_"+str(args.sess)+".pickle", 'wb') as handle:
+        #     pickle.dump(args.sample_per_task_testing, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
 
 if __name__ == '__main__':

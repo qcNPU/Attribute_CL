@@ -147,9 +147,9 @@ class IncrementalDataset:
         self.test_data_loader = torch.utils.data.DataLoader(self.test_dataset, batch_size=self.args.test_batch,shuffle=False,num_workers=self._workers, sampler=SubsetRandomSampler(test_indices, False))
 
         task_info = {
+            "ses": self._current_task,
             "min_class": min_class,
             "max_class": max_class,
-            "task": self._current_task+1,
             "max_task": len(self.increments),
             "n_train_data": len(train_indices),
             "n_test_data": len(test_indices)
