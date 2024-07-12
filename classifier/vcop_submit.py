@@ -19,6 +19,9 @@ from dataset.gpt_generation import attributes
 import matplotlib.pyplot as plt
 from kmeans_pytorch import kmeans
 from sklearn.cluster import KMeans
+import heapq
+from collections import defaultdict
+import random
 
 class PromptLearner(nn.Module):
     def __init__(self, args, class_names, clip_model, prompt_pool, ctx_len=12, prompt_pos=2):
@@ -29,8 +32,11 @@ class PromptLearner(nn.Module):
         self.ctx_len = ctx_len
         self.ctx_dim = clip_model.ln_final.weight.shape[0]
         self.dtype = clip_model.dtype
-        self.prompt_pool = prompt_pool
-        #用同等数量的 x 来代表top-K prompt的总长度，12*3
+        # self.prompt_pool = prompt_pool
+        self.global_prompt = prompt_pool.global_prompt
+        self.attribute_prompt =prompt_pool.attribute_prompt
+
+        #用同等数量的 x 来代表top-K prompt的总长度，12*3 todo 这里尝试2*ctx_len * self.args.text_prompt
         prompt_prefix =' '.join(['x'] * ctx_len * self.args.text_prompt)
         prompts = [prompt_prefix + ' ' + name + '.' for name in class_names]
         classnames = [name.replace('_', ' ') for name in class_names]
@@ -53,7 +59,7 @@ class PromptLearner(nn.Module):
         self.register_buffer('nc_token_suffix', embedding[:, 1 + ctx_len:, :])
 
 
-    def forward(self,indices_g, test_class=None, infer=False):
+    def forward(self,indices_g,indices_a=None, test_class=None, infer=False):
         if infer:
             prompt_prefix =' '.join(['x'] * self.ctx_len * self.args.text_prompt)
             # 将当前所有class制作cls token，与prompt拼接
@@ -69,8 +75,8 @@ class PromptLearner(nn.Module):
             self.register_buffer( 'token_suffix', embedding[:, 1+(self.ctx_len * self.args.text_prompt):, :]) # CLS, EOS, [n_cls, -1, ctx_dim]
             self.cls_num = len(test_class)
         batch = indices_g.shape[0]
-        prom_global = self.prompt_pool.global_prompt[indices_g]             #(32,3,12,768)
-        prom_attri = self.prompt_pool.attribute_prompt[indices_g]           #(32,3,12,768)
+        prom_global = self.global_prompt[indices_g]             #(32,3,12,768)
+        prom_attri = self.attribute_prompt[indices_a]           #(32,3,12,768)
         ctx=torch.cat([prom_global,prom_attri]).view(batch, -1, self.ctx_dim)#(32,72,768)
 
         if self.prompt_pos == 2:
@@ -113,7 +119,7 @@ class PromptLearner(nn.Module):
             return prompts, tokenized_prompts, nc_prompts, nc_tokenized_prompts
 
     def only_prefix(self):
-        ctx = torch.cat([self.prompt_pool.global_prompt,self.prompt_pool.attribute_prompt],dim=1)
+        ctx = torch.cat([self.global_prompt,self.attribute_prompt],dim=1)
         prompt_size = ctx.shape[0]
         nc_tokenized_prompts = self.nc_tokenized_prompts.repeat(prompt_size, 1)
         prefix = self.nc_token_prefix.repeat(prompt_size, 1, 1)
@@ -247,9 +253,12 @@ class CLIP(nn.Module):
     def init_cls_map(self,cls_en_map):
         self.cls_en_map = cls_en_map
         self.cluster_info = cluster_attributes(cls_en_map)
+        self.key_statis = {i: {j: 0 for j in range(10)} for i in range(self.args.class_per_task * (self.args.sess+1))}
+        self.overall_key_counts = {cls: {i: 0 for i in range(self.args.num_prompt)} for cls in range(100)}
+        # self.overall_key_counts = defaultdict(lambda: Counter({i: 0 for i in range(self.args.num_prompt)}))
 
 
-    def forward(self, image, labels, ses=0, test_class=None, test=False):
+    def forward(self, image, labels, test_class=None, test=False):
         batch = image.shape[0]
         # 1. 获取image feature z
         with torch.no_grad():
@@ -260,37 +269,173 @@ class CLIP(nn.Module):
         # 2. image feature与global key做匹配，global key与Attribute key绑定
         probability_g = image_features @ self.global_key.t()  # (32,768)  (10,768)
         _, indices_g = probability_g.topk(k=min(self.args.text_prompt, probability_g.shape[1]), dim=1,largest=True)  # (32,3)
+        # probability_a = image_features @ self.attribute_key.t()  # (32,768)  (10,768)
+        # _, indices_a = probability_a.topk(k=min(self.args.text_prompt, probability_a.shape[1]), dim=1,largest=True)  # (32,3)
+        # if test:
+        #     _, indices_a = probability_a.topk(k=min(self.args.text_prompt, probability_g.shape[1]), dim=1,largest=True)  # (32,3)
+        #     indices_g= self.distribute_keys_balanced(image_features,labels,self.global_key,True)
+        # else:
+        #     indices_a= self.distribute_keys_balanced(image_features,labels,False)
         key_choose_g = self.global_key[indices_g]  # (32,3,768)
         key_choose_a = self.attribute_key[indices_g]
 
+        loss=1
         if not test:
+            self.key_choose_statis(batch, indices_g, labels,self.overall_key_counts,test)
             # 3. 传入所选key index，拼装text prompt
-            text_prompt, tokenized_prompts, nc_prompts, nc_tokenized_prompts = self.prompt_learner(indices_g)
+            text_prompt, tokenized_prompts, nc_prompts, nc_tokenized_prompts = self.prompt_learner(indices_g,indices_g)
             text_features = self.text_encoder(text_prompt, tokenized_prompts)  # (320,77,768)  (320,77)
             text_features = text_features / text_features.norm(dim=-1, keepdim=True)#text_features：(320,768)
-            #batch_tempaltes:list,list :32,10
-            embed_choose, batch_tempaltes, attr_choose = self.show_image_attrs(batch,image_features,labels,test)
+
+            batch_choose, batch_tempaltes, attr_choose = self.show_image_attrs(batch,image_features,labels,test,loss)# (32,3,768)
             tempalte_feature = torch.cat([tokenize(t).cuda() for t in batch_tempaltes])  # (320,77)
             with torch.no_grad():
                 tempalte_feature = self.template_encoder(tempalte_feature)
                 tempalte_feature /= tempalte_feature.norm(dim=-1, keepdim=True)  # tempalte_feature：(320,768)
-            batch_choose = torch.stack(embed_choose,dim=0)  # (32,3,768)
 
             #logits_pt：两个text encoder的feature的拉近，目的：为Attribute prompt赋予物理意义
             logit_scale = self.logit_scale.exp()
             text_features = text_features.view(image_features.shape[0], self.class_num, -1)  # (32,10,768)
-            # 将template（1）与text feature计算cosine，再与y计算CE
-            # tempalte_feature = tempalte_feature.unsqueeze(1)  # (32,1,768)
-            # 将template（10）与text feature计算cosine，再与y计算CE
-            # tempalte_feature = tempalte_feature.view(image_features.shape[0], self.class_num, -1)
-            # logits_pt = logit_scale * (tempalte_feature * text_features).sum(-1)
-            # loss_pt = F.cross_entropy(logits_pt, y)
 
-            #这里计算的是cosine相似度loss
-            # text=torch.cat([text_features[i:(i+1),labels[i]:(labels[i]+1),:] for i in range(image_features.shape[0])],dim = 0).squeeze(1)
-            # cosine_sim = F.cosine_similarity(tempalte_feature, text, dim=1)
-            # loss_pt = 1 - torch.mean(cosine_sim)
+            loss_pt = self.compute_loss_pt(loss=loss,tempalte_feature=tempalte_feature,text_features=text_features,
+                                           labels=labels,batch=batch,logit_scale=logit_scale)
 
+            #logits_it，不归一化
+            image_features = image_features.unsqueeze(1)                                    #(32,1,768)
+            text_features = text_features.view(image_features.shape[0], self.class_num, -1)#(32,10,768)
+            logits_it = logit_scale * (image_features * text_features).sum(-1)
+            loss_main = F.cross_entropy(logits_it, labels)
+
+            # loss_m：prompt之间的正交性约束
+            nc_text_features = self.text_encoder(nc_prompts, nc_tokenized_prompts)
+            nc_text_features = nc_text_features / nc_text_features.norm(dim=-1, keepdim=True)
+            dis = nc_text_features @ nc_text_features.permute(1, 0)
+            loss_m = dis[~torch.eye(self.args.num_prompt, dtype=torch.bool, device='cuda')].abs().mean()
+            key_choose = [key_choose_g,key_choose_a,batch_choose,attr_choose]
+
+            return loss_main, image_features, key_choose, loss_m,loss_pt
+        else:
+            batch_choose, batch_tempaltes, attr_choose = self.show_image_attrs(batch, image_features, labels,test,loss)
+            text_prompt, tokenized_prompts = self.prompt_learner(indices_g,indices_g,test_class,test)
+            self.key_choose_statis(batch, indices_g, labels, self.key_statis,test)
+            text_features = self.text_encoder(text_prompt,tokenized_prompts)
+            text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+            text_features = text_features.view(image_features.shape[0], len(test_class), -1)
+            image_features = image_features.unsqueeze(1)
+            logit_scale = self.logit_scale.exp()
+            logits_it = logit_scale * (image_features * text_features).sum(-1)
+            pred_y = logits_it.float().softmax(dim=-1)
+            return [pred_y,attr_choose]
+
+
+    @property
+    def dtype(self):
+        return self.image_encoder.conv1.weight.dtype
+
+    def distribute_keys_by_similar(self,images, classes,keys, similarity_matrix,top_n=3):
+        # Group images by their class
+        class_to_images = defaultdict(list)
+        for i, cls in enumerate(classes):
+            class_to_images[cls.item()].append(i)
+
+        # Initialize a list to store the chosen key indices for each image
+        chosen_key_indices = [[] for _ in images]
+
+        # Process each class group separately
+        for cls, image_indices in class_to_images.items():
+            class_key_counts = self.overall_key_counts[cls]
+
+            # Create a min-heap to track the least chosen key indices for this class
+            class_heap = [(class_key_counts[key_index], key_index) for key_index in range(len(keys))]
+            heapq.heapify(class_heap)
+
+            for i in image_indices:
+                similarity_scores = similarity_matrix[i]
+
+                # Create a list of (similarity, key_index) tuples and sort it by similarity in descending order
+                similarity_key_pairs = [(similarity_scores[j], j) for j in range(len(keys))]
+                similarity_key_pairs.sort(reverse=True, key=lambda x: x[0])
+
+                # Use a local heap to track the least chosen key indices within this class group
+                local_heap = [(class_key_counts[key_index], key_index) for _, key_index in similarity_key_pairs[:top_n]]
+                heapq.heapify(local_heap)
+
+                # Select top_n key indices with the least counts within this class
+                selected_key_indices = []
+                for _ in range(top_n):
+                    while True:
+                        count, key_index = heapq.heappop(local_heap)
+                        if key_index not in chosen_key_indices[i]:
+                            chosen_key_indices[i].append(key_index)
+                            selected_key_indices.append(key_index)
+                            class_key_counts[key_index] += 1
+                            break
+                        heapq.heappush(local_heap, (count, key_index))  # Push back if not selected
+
+                # Update the class heap with the new counts
+                for key_index in selected_key_indices:
+                    heapq.heappush(class_heap, (class_key_counts[key_index], key_index))
+
+        # Convert chosen_key_indices to tensor
+        chosen_key_indices_tensor = torch.tensor(chosen_key_indices)
+
+        return chosen_key_indices_tensor
+
+    def distribute_keys_balanced(self,images, classes,test=False, top_n=3):
+        # Group images by their class
+        labels = classes if test else (classes + self.args.class_per_task * self.args.sess)
+        class_to_images = defaultdict(list)
+        for i, cls in enumerate(labels):
+            class_to_images[cls.item()].append(i)
+
+        # Initialize a list to store the chosen key indices for each image
+        chosen_key_indices = [[] for _ in images]
+
+        # Process each class group separately
+        for cls, image_indices in class_to_images.items():
+            cls_used = self.overall_key_counts[cls]
+            if not all(value == 0 for value in cls_used.values()):
+                selected_key_indices =[key for key,value in cls_used.items() if value != 0]
+            else:
+                overall_key_counts_excluding_cls = defaultdict(int)
+                for other_cls, counts in self.overall_key_counts.items():
+                    if other_cls != cls:
+                        for key, count in counts.items():
+                            overall_key_counts_excluding_cls[key] += count
+
+                # Sort keys by their usage in other classes
+                key_usage_sorted = sorted(overall_key_counts_excluding_cls.items(), key=lambda item: item[1])
+                least_used_keys = [key for key, _ in key_usage_sorted[:top_n]]
+                selected_key_indices =least_used_keys
+
+            # Assign the selected key indices to all images in the current class
+            for i in image_indices:
+                chosen_key_indices[i] = selected_key_indices
+
+            # Update overall_key_counts manually to avoid ignoring zero-value items
+            for key in range(self.args.num_prompt):
+                if key in selected_key_indices:
+                    self.overall_key_counts[cls][key] += 1
+                else:
+                    if key not in self.overall_key_counts[cls]:
+                        self.overall_key_counts[cls][key] = 0
+
+        # Convert chosen_key_indices to tensor
+        chosen_key_indices_tensor = torch.tensor(chosen_key_indices)
+
+        return chosen_key_indices_tensor
+
+
+    def key_choose_statis(self,batch,indices_g,classes,statisMap,test):
+        labels = classes if test else (classes + self.args.class_per_task * self.args.sess)
+        #外层代表class index，内层代表key index
+        for i in range(batch):
+            chose = indices_g[i:i + 1, :].squeeze(0)
+            for j in chose:
+                statisMap[labels[i].item()][j.item()] += 1
+    def compute_loss_pt(self,loss,tempalte_feature,text_features,labels,batch,logit_scale):
+        # loss=1：三元损失，拉近、拉远
+        if loss == 1:
             indices_list = [labels[i] for i in range(batch)]
             selected_tensors = []
             other_tensors = []
@@ -310,54 +455,43 @@ class CLIP(nn.Module):
             # 将列表转换为张量
             selected_tensors = torch.stack(selected_tensors, dim=0)
             other_tensors = torch.stack(other_tensors, dim=0)
-            loss_pt = self.triplet_loss(tempalte_feature,selected_tensors,other_tensors)
+            loss_pt = self.triplet_loss(tempalte_feature,selected_tensors,other_tensors,logit_scale)
+        elif loss ==2:
+            # loss=2：使用cosine distance拉近
+            text=torch.cat([text_features[i:(i+1),labels[i]:(labels[i]+1),:] for i in range(batch)],dim = 0).squeeze(1)
+            cosine_sim =  F.cosine_similarity(tempalte_feature, text, dim=-1)
+            loss_pt = 1 - torch.mean(cosine_sim)
+        elif loss == 3:
+            # loss=3：使用cosine相似度，template1
+            # 将template（1）与text feature计算cosine，再与y计算CE
+            tempalte_feature = tempalte_feature.unsqueeze(1)  # (32,1,768)
+            logits_pt = logit_scale * (tempalte_feature * text_features).sum(-1)
+            loss_pt = F.cross_entropy(logits_pt, labels)
+            #97,94.5,90.5,86.4,84.9
+        elif loss == 4:
+            # loss=4：使用cosine相似度，template10
+            # 将template（10）与text feature计算cosine，再与y计算CE
+            tempalte_feature = tempalte_feature.view(batch, self.class_num, -1)
+            logits_pt = logit_scale * (tempalte_feature * text_features).sum(-1)
+            loss_pt = F.cross_entropy(logits_pt, labels)
+        return loss_pt
 
-            #logits_it，不需要归一化
-            image_features = image_features.unsqueeze(1)#(32,1,768)
-            text_features = text_features.view(image_features.shape[0], self.class_num, -1)#(32,10,768)
-            logits_it = logit_scale * (image_features * text_features).sum(-1)
-
-            # loss_m：prompt之间的正交性约束
-            nc_text_features = self.text_encoder(nc_prompts, nc_tokenized_prompts)
-            nc_text_features = nc_text_features / nc_text_features.norm(dim=-1, keepdim=True)
-            dis = nc_text_features @ nc_text_features.permute(1, 0)
-            loss_m = dis[~torch.eye(self.args.num_prompt, dtype=torch.bool, device='cuda')].abs().mean()
-            key_choose = [key_choose_g,key_choose_a,batch_choose,attr_choose]
-
-            return logits_it, image_features, key_choose, loss_m,loss_pt
-        else:
-            embed_choose, batch_tempaltes, attr_choose = self.show_image_attrs(batch, image_features, labels,test)
-            text_prompt, tokenized_prompts = self.prompt_learner(indices_g,test_class,test)
-            text_features = self.text_encoder(text_prompt,tokenized_prompts)
-            text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-            logit_scale = self.logit_scale.exp()
-            text_features = text_features.view(image_features.shape[0], len(test_class), -1)
-            image_features = image_features.unsqueeze(1)
-            logit_scale = self.logit_scale.exp()
-            logits_it = logit_scale * (image_features * text_features).sum(-1)
-            return [logits_it,attr_choose]
-
-
-    @property
-    def dtype(self):
-        return self.image_encoder.conv1.weight.dtype
-
-    def triplet_loss(self,anchor, positive, negative, margin=1.0, distance='cosine'):
+    def triplet_loss(self,anchor, positive, negative,logit_scale, margin=1.0, distance='cosine'):
         # 计算 anchor 和 positive 的余弦相似度
-        cos_sim_pos = F.cosine_similarity(anchor, positive, dim=-1, eps=1e-8)
-
+        cos_sim_pos = F.cosine_similarity(anchor, positive, dim=-1, eps=1e-8)#
         # 计算 anchor 和 negative 的余弦相似度
-        cos_sim_neg = F.cosine_similarity(anchor.unsqueeze(1), negative, dim=-1, eps=1e-8)
-
+        cos_sim_neg = F.cosine_similarity(anchor.unsqueeze(1), negative, dim=-1, eps=1e-8)#
         # 计算损失
         triplet_loss = F.relu(cos_sim_neg - cos_sim_pos.unsqueeze(1) + margin)
-
-        # 求平均损失
         triplet_loss = triplet_loss.mean()
+
+        # loss_pt_pos = 1 - torch.mean(cos_sim_pos)
+        # loss_pt_neg = torch.mean(cos_sim_neg)
+        # triplet_loss = loss_pt_pos + loss_pt_neg
 
         return triplet_loss
 
-    def show_image_attrs(self, batch, image_features, labels,test,all_attr=False,cluster=True):
+    def show_image_attrs(self, batch, image_features, labels, test, loss=1, cluster=True):
 
         embed_choose = []
         batch_tempaltes = []
@@ -393,13 +527,13 @@ class CLIP(nn.Module):
             embed_choose.append(entity_choose)
             attr_choose.append(attr_strs)
             # 3.5 组装template text
-            if  all_attr:
+            if  loss == 4:
                 tempaltes = [f"A photo of a {label} with attributes of " + " ,".join(attr_strs) for label in
                              self.train_class]
             else:
                 tempaltes = "A photo of a " + self.test_class[lab] + " with attributes of " + " ,".join(attr_strs)
             batch_tempaltes.append(tempaltes)
-        return embed_choose,batch_tempaltes,attr_choose
+        return torch.stack(embed_choose,dim=0),batch_tempaltes,attr_choose
 
 
 def image_display(images, attributes,prefix, grid_size=(3, 3)):
@@ -455,18 +589,18 @@ class CoOp:
 
         # 1. 初始化prompt pool
         # 1.1 global key：（keyNum, ctx_dim）——（key数量 ，每个vector为多少维）
-        text_key = torch.empty(self.num_prompt, self.ctx_dim, dtype=self.dtype).cuda()
-        nn.init.normal_(text_key, std=0.02)
+        global_key = torch.empty(self.num_prompt, self.ctx_dim, dtype=self.dtype).cuda()
+        nn.init.normal_(global_key, std=0.02)
         # 1.2 global prompt：（keyNum, ctx_len, ctx_dim）——（key数量，每个prompt包含几个learnable vector，每个vector为多少维）
-        text_prompt = torch.empty(self.num_prompt, (self.ctx_len//2), self.ctx_dim, dtype=self.dtype).cuda()
-        nn.init.normal_(text_prompt, std=0.02)
+        global_prompt = torch.empty(self.num_prompt, (self.ctx_len//2), self.ctx_dim, dtype=self.dtype).cuda()
+        nn.init.normal_(global_prompt, std=0.02)
 
         if  keep == True :
-            self.text_key = nn.Parameter(prev_key)
-            self.text_prompt = nn.Parameter(prev_prompt)
+            self.global_key = nn.Parameter(prev_key)
+            self.global_prompt = nn.Parameter(prev_prompt)
         else:
-            self.text_key = nn.Parameter(text_key)
-            self.text_prompt = nn.Parameter(text_prompt)
+            self.global_key = nn.Parameter(global_key)
+            self.global_prompt = nn.Parameter(global_prompt)
 
         attribute_key = torch.empty(self.num_prompt, self.ctx_dim, dtype=self.dtype).cuda()
         nn.init.normal_(attribute_key, std=0.02)
@@ -475,7 +609,7 @@ class CoOp:
         attribute_prompt = torch.empty(self.num_prompt, (self.ctx_len//2), self.ctx_dim, dtype=clip_model.dtype).cuda()
         nn.init.normal_(attribute_prompt, std=0.02)
         self.attribute_prompt = nn.Parameter(attribute_prompt)
-        self.prompt_pool = PromptPool(self.text_key, self.text_prompt, self.attribute_key, self.attribute_prompt)
+        self.prompt_pool = PromptPool(self.global_key, self.global_prompt, self.attribute_key, self.attribute_prompt)
 
 
 
@@ -512,11 +646,9 @@ class CoOp:
                 cur_iter_idx = epoch*per_epoch_steps+idx
                 self.scheduler.step(cur_iter_idx)
 
-                logits_it, ima_feat, key_choose, loss_m,loss_pt = self.model(x.cuda(),y)
-                # loss_main：text prompt与image；loss_tt：prompt与template loss_k：image和glo key；loss_a：attr key和attr emb；
-                loss_main = F.cross_entropy(logits_it, y)
-                loss_k = utils.cosine_loss(ima_feat,key_choose[0])#(32,1,768) (32,3,768)
-                loss_a = utils.cosine_loss_cp(key_choose[1],key_choose[2])#(32,3,768),(32,3,768)
+                loss_main, ima_feat, key_choose, loss_m,loss_pt = self.model(x.cuda(),y)
+                loss_k = utils.cosine_loss(ima_feat,key_choose[0])      #(32,1,768) global key(32,3,768)
+                loss_a = utils.cosine_loss_cp(key_choose[1],key_choose[2])#attri key(32,3,768),(32,3,768)
                 loss = loss_main + 0.7*loss_k + 0.3*loss_m+0.7*loss_a + loss_pt
 
                 self.optimizer.zero_grad()
@@ -524,6 +656,7 @@ class CoOp:
                 self.optimizer.step()
 
             print(f'Epoch [{(epoch + 1)}/{self.epochs}], Loss: {loss.item():.2f}')
+        print("train", self.model.overall_key_counts)
 
 
     def init_model(self, class_names, per_epoch_steps, text_key, cls_en_map):
@@ -538,10 +671,12 @@ class CoOp:
             except:
                 self.model.text_encoder.module.transformer.use_gradient_checkpoint = True
 
-        grad_param = ['global_key','global_prompt','attribute_key','attribute_prompt']
+        # grad_param = ['global_key','global_prompt','attribute_key','attribute_prompt']
+        grad_param = ['global_key','attribute_key']
         Other_params = [param for name, param in self.model.named_parameters() if name in grad_param]
         param_dict = [  {'params': [p for p in self.model.prompt_learner.parameters() if p.requires_grad]},
-                        {'params': Other_params},]
+                        {'params': Other_params},
+                        ]
 
         self.optimizer = torch.optim.SGD(param_dict, lr=self.lr, weight_decay=self.wd)
         self.scheduler = utils.build_cosine_scheduler(
@@ -601,17 +736,17 @@ class CoOp:
                 count_per_task[t] += (y.cuda()// self.args.class_per_task == t).sum().item()
         acc = [a*1.0/c for (a, c) in zip(acc_per_task, count_per_task)]
         # acc = np.array(acc).mean()
-
+        print("test",self.model.key_statis)
         return acc
 
 
     @torch.no_grad()
     def inference(self, image, labels, ses, test_class, batchIn):
-        logits = self.model(image, labels, ses, test_class, test=True)
+        results = self.model(image, labels, test_class, test=True)
         if (batchIn+1)%10==0:
-            image_display(image, logits[1],"Task" + str(ses + 1) + "-" + "batch" + str(batchIn + 1) + test_class[0] + " " + test_class[-1])
+            image_display(image, results[1],"Task" + str(ses + 1) + "-" + "batch" + str(batchIn + 1) + test_class[0] + " " + test_class[-1])
 
-        return logits[0].float().softmax(dim=-1)
+        return results[0]
 
 def getTaskEntitys(args, train_classnames):
     # 取出task中所有class的entity和attribute，合并去重
